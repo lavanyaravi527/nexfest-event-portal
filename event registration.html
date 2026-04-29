@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexFest 2025 — Event Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   THEME TOKENS
+═══════════════════════════════════════ */
+:root {
+  --gold:#f5c542; --gold-d:rgba(245,197,66,0.15); --gold-g:rgba(245,197,66,0.3);
+  --teal:#00e5c0; --teal-d:rgba(0,229,192,0.12);
+  --pink:#ff4db8; --pink-d:rgba(255,77,184,0.12);
+  --purple:#7b6cff; --purple-d:rgba(123,108,255,0.12);
+  --red:#ff5757; --green:#4ade80;
+  --fd:'Syne',sans-serif; --fb:'Nunito',sans-serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --r:12px; --rl:18px; --rxl:26px;
+}
+[data-theme="dark"] {
+  --bg:#03040a; --s1:#080b14; --s2:#0d1120; --s3:#131728; --s4:#1a1f35;
+  --border:rgba(255,255,255,0.07); --bhi:rgba(255,255,255,0.14);
+  --text:#eef0f8; --t2:#8890aa; --t3:#4a5068; --t4:#2e3350;
+  --card-bg:rgba(255,255,255,0.03); --shadow:rgba(0,0,0,0.6);
+  --input-bg:#0d1120; --input-focus:#131728;
+  --orb1:#1a0a40; --orb2:#0a2a20; --orb3:#2a1500;
+}
+[data-theme="light"] {
+  --bg:#f0f2fa; --s1:#ffffff; --s2:#f5f7ff; --s3:#ebeeff; --s4:#dde2ff;
+  --border:rgba(0,0,0,0.08); --bhi:rgba(0,0,0,0.16);
+  --text:#0d1120; --t2:#4a5068; --t3:#8890aa; --t4:#c5cadf;
+  --card-bg:rgba(255,255,255,0.7); --shadow:rgba(0,0,50,0.1);
+  --input-bg:#ffffff; --input-focus:#f5f7ff;
+  --orb1:rgba(123,108,255,0.08); --orb2:rgba(0,229,192,0.06); --orb3:rgba(245,197,66,0.08);
+}
+
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;cursor:none;transition:background 0.4s,color 0.4s}
+[data-theme="light"] body{cursor:auto}
+
+/* CURSOR */
+#cur,#cur-ring{position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:left .06s,top .06s}
+#cur{width:10px;height:10px;background:var(--gold);border-radius:50%;mix-blend-mode:multiply;z-index:99999}
+#cur-ring{width:36px;height:36px;border:1.5px solid rgba(245,197,66,0.5);border-radius:50%;transition:left .14s var(--ease),top .14s var(--ease),width .3s,height .3s}
+[data-theme="light"] #cur,[data-theme="light"] #cur-ring{display:none}
+body:has(button:hover) #cur-ring,body:has(a:hover) #cur-ring{width:50px;height:50px;border-color:var(--gold)}
+
+/* BG FX */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px)}
+[data-theme="dark"] .orb{opacity:.18}
+[data-theme="light"] .orb{opacity:1}
+.o1{width:700px;height:700px;background:var(--orb1);top:-200px;right:-200px;animation:of1 14s ease-in-out infinite alternate}
+.o2{width:500px;height:500px;background:var(--orb2);bottom:-100px;left:-100px;animation:of2 18s ease-in-out infinite alternate}
+.o3{width:350px;height:350px;background:var(--orb3);top:40%;left:35%;animation:of3 11s ease-in-out infinite alternate}
+@keyframes of1{from{transform:translate(0,0)}to{transform:translate(-80px,80px) scale(1.1)}}
+@keyframes of2{from{transform:translate(0,0)}to{transform:translate(70px,-60px) scale(1.15)}}
+@keyframes of3{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.3)}}
+.noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+[data-theme="light"] .noise{opacity:.015}
+.grid-bg{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%)}
+
+/* ═══════════════════════════════════════
+   THEME TOGGLE
+═══════════════════════════════════════ */
+#themeBtn{
+  position:fixed;top:20px;right:20px;z-index:9000;
+  width:52px;height:28px;border-radius:14px;
+  background:var(--s2);border:1px solid var(--bhi);
+  cursor:pointer;transition:all .3s;
+  display:flex;align-items:center;padding:3px;
+  box-shadow:0 2px 12px var(--shadow);
+}
+#themeBtn .knob{
+  width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),#e8a020);
+  transition:transform .3s var(--ease),background .3s;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+}
+[data-theme="light"] #themeBtn .knob{transform:translateX(24px);background:linear-gradient(135deg,#4a9eff,#0070d4)}
+#themeBtn:hover{border-color:var(--gold)}
+
+/* ═══════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════ */
+.page{position:relative;z-index:2;display:none;min-height:100vh;padding:0}
+.page.active{display:block}
+.pg-in{animation:pgIn .55s var(--ease) both}
+@keyframes pgIn{from{opacity:0;transform:translateY(24px) scale(.99)}to{opacity:1;transform:none}}
+
+/* ═══════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════ */
+.nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 32px;
+  background:rgba(var(--bg-rgb,3,4,10),0.8);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:background .4s,border-color .4s;
+}
+[data-theme="light"] .nav{background:rgba(240,242,250,0.85)}
+.nav-logo{font-family:var(--fd);font-size:18px;font-weight:800;letter-spacing:-0.5px}
+.nav-logo span{color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nav-chip{display:inline-flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:6px 14px 6px 10px;font-size:12px;cursor:pointer;transition:all .2s}
+.nav-chip:hover{border-color:var(--bhi)}
+.nav-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#08090f}
+
+/* ═══════════════════════════════════════
+   LOGIN — SPLIT
+═══════════════════════════════════════ */
+#loginPage .split{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+.ll{display:flex;flex-direction:column;justify-content:center;padding:60px 72px;position:relative;overflow:hidden}
+.ll::after{content:'';position:absolute;right:0;top:8%;bottom:8%;width:1px;background:linear-gradient(to bottom,transparent,var(--bhi),transparent)}
+.fest-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:3px;color:var(--gold);text-transform:uppercase;background:var(--gold-d);border:1px solid var(--gold-g);border-radius:100px;padding:6px 14px;margin-bottom:28px}
+.fest-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hl{font-family:var(--fd);font-size:clamp(40px,4.5vw,68px);font-weight:800;line-height:.92;letter-spacing:-2px;margin-bottom:20px}
+.hl .ghost{display:block;color:transparent;-webkit-text-stroke:1.5px var(--t3)}
+.hl .fire{background:linear-gradient(135deg,var(--gold),#ff9a3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+[data-theme="light"] .hl .ghost{-webkit-text-stroke:1.5px var(--t4)}
+.ldesc{font-size:15px;color:var(--t2);line-height:1.75;max-width:340px;margin-bottom:36px;font-weight:400}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:5px 12px;border-radius:100px;border:1px solid var(--border);color:var(--t2);background:var(--s2);transition:all .2s;cursor:default}
+.pill:hover{border-color:var(--gold);color:var(--gold)}
+/* countdown strip */
+.countdown-strip{display:flex;gap:12px;margin-top:40px}
+.cd-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;text-align:center;min-width:60px}
+.cd-num{font-family:var(--fd);font-size:26px;font-weight:800;color:var(--gold);line-height:1}
+.cd-lbl{font-size:9px;color:var(--t3);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.cd-sep{font-family:var(--fd);font-size:24px;color:var(--t3);align-self:center;padding-bottom:8px}
+/* marquee */
+.mq{overflow:hidden;position:relative;margin-top:36px}
+.mq::before,.mq::after{content:'';position:absolute;top:0;bottom:0;width:50px;z-index:2}
+.mq::before{left:0;background:linear-gradient(to right,var(--bg),transparent)}
+.mq::after{right:0;background:linear-gradient(to left,var(--bg),transparent)}
+.mq-track{display:flex;gap:20px;animation:mq 22s linear infinite;width:max-content}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mq-i{font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);white-space:nowrap;display:flex;align-items:center;gap:12px}
+.mq-i::after{content:'·';color:var(--gold);font-size:18px}
+
+/* Login right */
+.lr{display:flex;align-items:center;justify-content:center;padding:60px 72px;background:var(--card-bg)}
+.lfw{width:100%;max-width:380px}
+.lfw h2{font-family:var(--fd);font-size:28px;font-weight:800;margin-bottom:6px}
+.lfw p{font-size:14px;color:var(--t2);margin-bottom:32px}
+.login-tabs{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:28px;gap:4px}
+.ltab{flex:1;padding:9px;text-align:center;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;color:var(--t2);font-family:var(--fd)}
+.ltab.active{background:var(--gold);color:#08090f;box-shadow:0 2px 8px var(--gold-g)}
+
+/* ═══════════════════════════════════════
+   FORM CONTROLS
+═══════════════════════════════════════ */
+.field{margin-bottom:16px;position:relative}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:7px;transition:color .2s}
+.field:focus-within label{color:var(--gold)}
+.iw{position:relative;display:flex;align-items:center}
+.iw .ii{position:absolute;left:13px;color:var(--t3);font-size:15px;pointer-events:none;transition:color .2s;z-index:1}
+.field:focus-within .ii{color:var(--gold)}
+.iw input,.iw select,.iw textarea{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);
+  border-radius:var(--r);color:var(--text);font-family:var(--fb);font-size:14px;
+  padding:12px 14px 12px 40px;outline:none;
+  transition:border-color .25s,box-shadow .25s,background .25s;
+  -webkit-appearance:none;appearance:none
+}
+.iw.ni input,.iw.ni select,.iw.ni textarea{padding-left:14px}
+.iw input:focus,.iw select:focus,.iw textarea:focus{border-color:rgba(245,197,66,.5);background:var(--input-focus);box-shadow:0 0 0 3px rgba(245,197,66,.08)}
+.iw input::placeholder,.iw textarea::placeholder{color:var(--t3)}
+.iw select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%234a5068' d='M5 6L0 0h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.iw select option{background:var(--s2)}
+.iw textarea{resize:vertical;min-height:80px;line-height:1.6}
+.pw-eye{position:absolute;right:10px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:15px;padding:4px;z-index:2;transition:color .2s}
+.pw-eye:hover{color:var(--t2)}
+.field.err .iw input,.field.err .iw select{border-color:rgba(255,87,87,.5);box-shadow:0 0 0 3px rgba(255,87,87,.07)}
+.ferr{font-size:11px;color:var(--red);margin-top:4px;display:none}
+.field.err .ferr{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* password strength */
+.pw-strength{margin-top:6px;display:none}
+.pw-strength.show{display:block}
+.ps-bar{height:3px;border-radius:2px;background:var(--s3);overflow:hidden;margin-bottom:4px}
+.ps-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.ps-lbl{font-size:10px;color:var(--t3)}
+
+/* ═══════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--fd);font-size:12px;font-weight:700;letter-spacing:.5px;border:none;border-radius:var(--r);cursor:pointer;padding:12px 20px;transition:all .22s var(--ease);position:relative;overflow:hidden;text-transform:uppercase}
+.btn-gold{background:linear-gradient(135deg,var(--gold) 0%,#e8a020 100%);color:#08090f;box-shadow:0 4px 18px var(--gold-g);width:100%;padding:14px;font-size:13px}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(245,197,66,.45)}
+.btn-gold:active{transform:translateY(0)}
+.btn-ghost{background:var(--s2);border:1px solid var(--border);color:var(--t2);width:100%;margin-top:10px}
+.btn-ghost:hover{border-color:var(--bhi);color:var(--text)}
+.btn-sm{padding:6px 14px;font-size:10px;border-radius:8px;margin-top:0;width:auto}
+.btn-teal{background:var(--teal-d);border:1px solid rgba(0,229,192,.25);color:var(--teal)}
+.btn-teal:hover{background:rgba(0,229,192,.22)}
+.btn-pink{background:var(--pink-d);border:1px solid rgba(255,77,184,.25);color:var(--pink)}
+.btn-pink:hover{background:rgba(255,77,184,.22)}
+.btn-red{background:rgba(255,87,87,.1);border:1px solid rgba(255,87,87,.3);color:var(--red)}
+.btn-red:hover{background:rgba(255,87,87,.2)}
+.btn-purple{background:var(--purple-d);border:1px solid rgba(123,108,255,.3);color:var(--purple)}
+.btn-purple:hover{background:rgba(123,108,255,.22)}
+.btn-back{background:none;border:none;color:var(--t2);font-family:var(--fb);font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:0;transition:color .2s}
+.btn-back:hover{color:var(--text)}
+.btn .spin{display:none;width:15px;height:15px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:sp .7s linear infinite}
+.btn.loading .spin{display:inline-block}
+.btn.loading .lbl{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════════════
+   CARDS & SECTIONS
+═══════════════════════════════════════ */
+.gc{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--rxl);padding:36px;position:relative;overflow:hidden;backdrop-filter:blur(6px)}
+.gc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,197,66,.4),transparent)}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:18px;height:1px;background:var(--gold)}
+.stitle{font-family:var(--fd);font-size:clamp(20px,2.5vw,28px);font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
+.ssub{font-size:14px;color:var(--t2);margin-bottom:28px}
+
+/* ═══════════════════════════════════════
+   REG PAGE
+═══════════════════════════════════════ */
+#regPage .inner,#dashPage .inner,#adminPage .inner,#schedulePage .inner{max-width:740px;margin:0 auto;padding:32px 24px}
+
+/* progress bar */
+.prog{display:flex;align-items:center;margin-bottom:32px}
+.stp{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;transition:color .3s}
+.stp.active{color:var(--gold)}
+.stp.done{color:var(--teal)}
+.stp-n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--t3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;transition:all .3s}
+.stp.active .stp-n{border-color:var(--gold);color:var(--gold);background:var(--gold-d)}
+.stp.done .stp-n{border-color:var(--teal);background:var(--teal-d);color:var(--teal)}
+.stp-line{flex:1;height:1px;background:var(--border);margin:0 10px;max-width:50px;transition:background .4s}
+.stp-line.done{background:var(--teal)}
+
+/* category cards */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+.cc{border:1.5px solid var(--border);border-radius:var(--rl);padding:14px 10px;text-align:center;cursor:pointer;transition:all .22s;background:var(--s2);position:relative;overflow:hidden}
+.cc::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s}
+.cc.tech::before{background:radial-gradient(circle at 50% 100%,rgba(123,108,255,.18),transparent 70%)}
+.cc.cultural::before{background:radial-gradient(circle at 50% 100%,rgba(255,77,184,.18),transparent 70%)}
+.cc.sports::before{background:radial-gradient(circle at 50% 100%,rgba(0,229,192,.18),transparent 70%)}
+.cc:hover::before,.cc.sel::before{opacity:1}
+.cc:hover{transform:translateY(-2px);border-color:var(--bhi)}
+.cc.sel.tech{border-color:rgba(123,108,255,.65)}
+.cc.sel.cultural{border-color:rgba(255,77,184,.65)}
+.cc.sel.sports{border-color:rgba(0,229,192,.65)}
+.cc-emoji{font-size:26px;margin-bottom:7px;display:block}
+.cc-lbl{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t2)}
+.cc.sel .cc-lbl{color:var(--text)}
+.cc-ct{font-size:10px;color:var(--t3);margin-top:3px}
+
+/* event chips */
+.echips{display:none;flex-wrap:wrap;gap:7px;margin-top:8px}
+.echips.on{display:flex}
+.ec{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:6px 13px;border-radius:100px;border:1.5px solid var(--border);background:var(--s2);cursor:pointer;transition:all .2s;color:var(--t2);white-space:nowrap}
+.ec:hover{border-color:var(--bhi);color:var(--text)}
+.ec.on.tech{border-color:rgba(123,108,255,.65);background:rgba(123,108,255,.1);color:#b0a8ff}
+.ec.on.cultural{border-color:rgba(255,77,184,.65);background:rgba(255,77,184,.1);color:#ff8fd4}
+.ec.on.sports{border-color:rgba(0,229,192,.65);background:rgba(0,229,192,.1);color:var(--teal)}
+.ec .ck{opacity:0;transition:opacity .15s;font-size:10px}
+.ec.on .ck{opacity:1}
+
+/* edit notice */
+.edit-notice{display:none;align-items:center;gap:10px;background:rgba(0,229,192,.06);border:1px solid rgba(0,229,192,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--teal);margin-bottom:20px}
+.edit-notice.on{display:flex}
+
+/* ═══════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.st{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.st:hover{border-color:var(--bhi);transform:translateY(-2px)}
+.st::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.st:nth-child(1)::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.st:nth-child(2)::after{background:linear-gradient(90deg,var(--purple),transparent)}
+.st:nth-child(3)::after{background:linear-gradient(90deg,var(--pink),transparent)}
+.st:nth-child(4)::after{background:linear-gradient(90deg,var(--teal),transparent)}
+.st-ico{font-size:20px;margin-bottom:10px}
+.st-num{font-family:var(--fd);font-size:32px;font-weight:800;line-height:1;letter-spacing:-1px;margin-bottom:3px}
+.st:nth-child(1) .st-num{color:var(--gold)}
+.st:nth-child(2) .st-num{color:var(--purple)}
+.st:nth-child(3) .st-num{color:var(--pink)}
+.st:nth-child(4) .st-num{color:var(--teal)}
+.st-lbl{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.ftabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.ftab{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.5px;padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--s2);cursor:pointer;transition:all .2s;color:var(--t2);text-transform:uppercase}
+.ftab.active{border-color:var(--gold);color:var(--gold);background:var(--gold-d)}
+.ftab:hover:not(.active){border-color:var(--bhi);color:var(--text)}
+.ftab .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.7}
+.ev-list{display:flex;flex-direction:column;gap:9px}
+.er{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;display:flex;align-items:center;gap:14px;transition:all .2s;position:relative;overflow:hidden;animation:ri .4s var(--ease) both}
+@keyframes ri{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.er:hover{border-color:var(--bhi);transform:translateX(3px)}
+.al{position:absolute;left:0;top:0;bottom:0;width:3px}
+.al-t{background:linear-gradient(to bottom,var(--purple),#4a3fcf)}
+.al-c{background:linear-gradient(to bottom,var(--pink),#c0348a)}
+.al-s{background:linear-gradient(to bottom,var(--teal),#00a88e)}
+.eib{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--s2);border:1px solid var(--border)}
+.ei{flex:1;min-width:0}
+.en{font-family:var(--fd);font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.em{display:flex;flex-wrap:wrap;gap:5px;font-size:11px;color:var(--t2)}
+.mc{display:inline-flex;align-items:center;gap:3px;background:var(--s2);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--t2)}
+.ea{display:flex;gap:6px;flex-shrink:0}
+.sr-row{display:flex;gap:10px;margin-bottom:14px}
+.siw{flex:1;position:relative}
+.siw input{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--fb);font-size:13px;padding:9px 13px 9px 36px;outline:none;transition:border-color .2s}
+.siw input:focus{border-color:var(--bhi)}
+.siw input::placeholder{color:var(--t3)}
+.siw .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t3);pointer-events:none}
+.empty-s{text-align:center;padding:50px 20px}
+.empty-s .ei2{font-size:48px;margin-bottom:14px;opacity:.45}
+.empty-s h3{font-family:var(--fd);font-size:18px;color:var(--t2);margin-bottom:6px}
+.empty-s p{font-size:13px;color:var(--t3)}
+
+/* ═══════════════════════════════════════
+   EVENT DETAIL MODAL
+═══════════════════════════════════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.on{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid var(--bhi);border-radius:var(--rxl);width:100%;max-width:620px;max-height:90vh;overflow-y:auto;transform:scale(.93) translateY(20px);transition:transform .4s var(--ease)}
+.overlay.on .modal{transform:none}
+.modal-hero{background:var(--s2);border-radius:var(--rxl) var(--rxl) 0 0;padding:32px;position:relative;overflow:hidden}
+.modal-hero::before{content:'';position:absolute;inset:0;opacity:.3}
+.modal-hero.tech::before{background:radial-gradient(circle at 0% 50%,rgba(123,108,255,.4),transparent 60%)}
+.modal-hero.cultural::before{background:radial-gradient(circle at 0% 50%,rgba(255,77,184,.4),transparent 60%)}
+.modal-hero.sports::before{background:radial-gradient(circle at 0% 50%,rgba(0,229,192,.4),transparent 60%)}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:var(--s3);border:1px solid var(--border);color:var(--t2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:1}
+.modal-close:hover{background:var(--s4);color:var(--text)}
+.modal-ev-icon{font-size:48px;margin-bottom:12px;display:block}
+.modal-ev-name{font-family:var(--fd);font-size:28px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px}
+.modal-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:100px;margin-bottom:16px}
+.tag-tech{background:rgba(123,108,255,.15);color:var(--purple);border:1px solid rgba(123,108,255,.3)}
+.tag-cultural{background:rgba(255,77,184,.15);color:var(--pink);border:1px solid rgba(255,77,184,.3)}
+.tag-sports{background:rgba(0,229,192,.15);color:var(--teal);border:1px solid rgba(0,229,192,.3)}
+.modal-body{padding:28px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.info-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.info-box .ib-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.info-box .ib-val{font-size:14px;font-weight:600;color:var(--text)}
+.prize-box{background:linear-gradient(135deg,var(--gold-d),transparent);border:1px solid var(--gold-g);border-radius:var(--r);padding:18px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.prize-icon{font-size:32px}
+.prize-title{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.prize-val{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--gold)}
+.section-h{font-family:var(--fd);font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-h::after{content:'';flex:1;height:1px;background:var(--border)}
+.rules-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.rules-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t2);line-height:1.5}
+.rules-list li::before{content:'→';color:var(--gold);font-weight:700;flex-shrink:0;margin-top:1px}
+.ev-desc{font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:22px}
+
+/* ═══════════════════════════════════════
+   SCHEDULE PAGE
+═══════════════════════════════════════ */
+.schedule-tabs{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:4px;gap:4px;margin-bottom:28px;flex-wrap:wrap}
+.schtab{flex:1;padding:9px;text-align:center;border-radius:8px;font-family:var(--fd);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;color:var(--t2);white-space:nowrap;min-width:80px}
+.schtab.active{background:var(--gold);color:#08090f}
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--gold),var(--purple),var(--teal));border-radius:2px}
+.tl-item{position:relative;margin-bottom:20px;animation:ri .4s var(--ease) both}
+.tl-dot{position:absolute;left:-26px;top:18px;width:12px;height:12px;border-radius:50%;border:2px solid var(--gold);background:var(--bg);transition:background .2s}
+.tl-item:hover .tl-dot{background:var(--gold)}
+.tl-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;transition:border-color .2s,transform .2s;cursor:pointer}
+.tl-card:hover{border-color:var(--bhi);transform:translateX(4px)}
+.tl-time{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
+.tl-name{font-family:var(--fd);font-size:15px;font-weight:700;margin-bottom:5px}
+.tl-meta{font-size:12px;color:var(--t2);display:flex;flex-wrap:wrap;gap:8px}
+.tl-venue{display:inline-flex;align-items:center;gap:4px}
+.tl-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.status-live{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.status-live::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+.status-up{background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-g)}
+.status-done{background:var(--s3);color:var(--t3);border:1px solid var(--border)}
+
+/* ═══════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════ */
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.admin-stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:20px;transition:all .2s;position:relative;overflow:hidden}
+.admin-stat:hover{border-color:var(--bhi);transform:translateY(-2px)}
+.admin-stat .bg-icon{position:absolute;right:16px;top:16px;font-size:40px;opacity:.08}
+.as-num{font-family:var(--fd);font-size:38px;font-weight:800;line-height:1;letter-spacing:-1px;margin-bottom:4px}
+.as-lbl{font-size:11px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.as-change{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--green);margin-top:6px;background:rgba(74,222,128,.1);padding:2px 8px;border-radius:100px;border:1px solid rgba(74,222,128,.2)}
+.admin-table-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden}
+.admin-table-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+.admin-table-head h3{font-family:var(--fd);font-size:16px;font-weight:700}
+.admin-table{width:100%;border-collapse:collapse}
+.admin-table th{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);background:var(--s2)}
+.admin-table td{font-size:13px;padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:var(--s2)}
+.badge-tech{background:var(--purple-d);color:var(--purple);border:1px solid rgba(123,108,255,.25);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.badge-cultural{background:var(--pink-d);color:var(--pink);border:1px solid rgba(255,77,184,.25);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.badge-sports{background:var(--teal-d);color:var(--teal);border:1px solid rgba(0,229,192,.25);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.export-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--s2);cursor:pointer;color:var(--t2);transition:all .2s;font-family:var(--fd)}
+.export-btn:hover{border-color:var(--bhi);color:var(--text)}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:13px;z-index:10000;transform:translateY(70px) scale(.95);opacity:0;transition:all .4s var(--ease);box-shadow:0 16px 48px var(--shadow);min-width:220px;max-width:340px;pointer-events:none}
+.toast.on{transform:none;opacity:1}
+.toast.success{border-color:rgba(74,222,128,.25)}
+.toast.error{border-color:rgba(255,87,87,.25)}
+.toast.info{border-color:var(--gold-g)}
+.t-ico{font-size:18px;flex-shrink:0}
+.t-body .t-title{font-weight:700;margin-bottom:2px}
+.t-body .t-msg{font-size:11px;color:var(--t2)}
+
+/* ═══════════════════════════════════════
+   NOTIFICATION BELL & PANEL
+═══════════════════════════════════════ */
+.notif-bell{position:relative;cursor:pointer}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--fd);animation:bell-pop .4s var(--ease);border:2px solid var(--bg)}
+@keyframes bell-pop{from{transform:scale(0)}to{transform:scale(1)}}
+.notif-panel{position:fixed;top:64px;right:20px;width:340px;max-height:480px;background:var(--s1);border:1px solid var(--bhi);border-radius:var(--rxl);z-index:8000;box-shadow:0 24px 60px var(--shadow);overflow:hidden;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(-10px) scale(.97);transition:all .3s var(--ease)}
+.notif-panel.open{opacity:1;pointer-events:all;transform:none}
+.notif-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.notif-head h4{font-family:var(--fd);font-size:14px;font-weight:800}
+.notif-head-actions{display:flex;align-items:center;gap:8px}
+.notif-mark{font-size:10px;color:var(--teal);cursor:pointer;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.notif-mark:hover{color:var(--text)}
+.notif-list{overflow-y:auto;flex:1;padding:8px}
+.notif-item{display:flex;gap:11px;padding:11px 10px;border-radius:var(--r);cursor:pointer;transition:background .2s;position:relative}
+.notif-item:hover{background:var(--s2)}
+.notif-item.unread{background:var(--s2)}
+.notif-item.unread::before{content:'';position:absolute;left:8px;top:50%;transform:translateY(-50%);width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.notif-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ni-reminder{background:var(--gold-d)}
+.ni-payment{background:rgba(74,222,128,.12)}
+.ni-event{background:var(--purple-d)}
+.ni-alert{background:var(--pink-d)}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.notif-msg{font-size:11px;color:var(--t2);line-height:1.45}
+.notif-time{font-size:10px;color:var(--t3);margin-top:3px}
+.notif-empty{text-align:center;padding:36px 20px;color:var(--t3);font-size:13px}
+
+/* Floating reminder toast (different from main toast) */
+.ev-reminder{position:fixed;top:80px;right:28px;background:var(--s1);border:1px solid var(--gold-g);border-radius:var(--rl);padding:16px 18px;z-index:9500;box-shadow:0 12px 40px var(--shadow);max-width:300px;display:flex;gap:12px;align-items:flex-start;transform:translateX(130%) scale(.95);opacity:0;transition:all .5s var(--ease);pointer-events:none}
+.ev-reminder.show{transform:none;opacity:1;pointer-events:all}
+.ev-reminder-icon{font-size:28px;flex-shrink:0}
+.ev-reminder-body{}
+.ev-reminder-title{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--gold);margin-bottom:3px}
+.ev-reminder-msg{font-size:11px;color:var(--t2);line-height:1.5}
+.ev-reminder-close{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px}
+.ev-reminder-close:hover{color:var(--text)}
+.ev-reminder-bar{height:2px;background:var(--s3);border-radius:2px;margin-top:10px;overflow:hidden}
+.ev-reminder-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;transition:width linear}
+
+/* ═══════════════════════════════════════
+   PAYMENT MODAL & STATUS
+═══════════════════════════════════════ */
+.pay-modal-inner{max-width:480px}
+.pay-steps{display:flex;gap:0;margin-bottom:28px}
+.pay-step{flex:1;text-align:center;position:relative}
+.pay-step::after{content:'';position:absolute;top:14px;left:50%;right:-50%;height:1px;background:var(--border);z-index:0}
+.pay-step:last-child::after{display:none}
+.ps-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin:0 auto 6px;background:var(--s1);position:relative;z-index:1;transition:all .3s}
+.pay-step.active .ps-circle{border-color:var(--gold);color:var(--gold);background:var(--gold-d)}
+.pay-step.done .ps-circle{border-color:var(--teal);color:var(--teal);background:rgba(0,229,192,.12)}
+.ps-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.pay-step.active .ps-lbl{color:var(--gold)}
+.pay-step.done .ps-lbl{color:var(--teal)}
+.pay-summary{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:20px}
+.pay-ev-name{font-family:var(--fd);font-size:17px;font-weight:800;margin-bottom:12px}
+.pay-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--t2)}
+.pay-row:last-child{border-bottom:none;font-weight:700;color:var(--text);font-size:15px;padding-top:12px}
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.pay-method{border:1.5px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center;cursor:pointer;transition:all .22s;background:var(--s2)}
+.pay-method:hover{border-color:var(--bhi)}
+.pay-method.sel{border-color:var(--gold);background:var(--gold-d)}
+.pay-method-icon{font-size:24px;margin-bottom:5px}
+.pay-method-lbl{font-size:11px;font-weight:700;color:var(--t2)}
+.pay-method.sel .pay-method-lbl{color:var(--gold)}
+.pay-upi-field{margin-bottom:16px;display:none}
+.pay-upi-field.show{display:block}
+.pay-success-wrap{text-align:center;padding:20px}
+.pay-success-icon{font-size:64px;margin-bottom:16px;animation:successPop .6s var(--ease)}
+@keyframes successPop{from{transform:scale(0) rotate(-10deg)}to{transform:scale(1) rotate(0)}}
+.pay-txn{font-family:var(--fd);font-size:11px;color:var(--t3);letter-spacing:2px;margin-top:8px}
+/* payment status badge in dashboard */
+.pay-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:100px}
+.pay-paid{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.pay-pending{background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-g)}
+.pay-free{background:var(--s3);color:var(--t3);border:1px solid var(--border)}
+
+/* pay badge (payment history rows) */
+.pay-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:4px 10px;border-radius:100px}
+.pay-badge.pay-paid{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.pay-badge.pay-pending{background:var(--gold-d);color:var(--gold);border:1px solid var(--gold-g)}
+.pay-badge.pay-failed{background:rgba(255,87,87,.1);color:var(--red);border:1px solid rgba(255,87,87,.3)}
+.pay-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* Admin Event Manager cards */
+.aem-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:18px;position:relative;overflow:hidden;transition:all .2s}
+.aem-card:hover{border-color:var(--bhi);transform:translateY(-2px)}
+.aem-custom-badge{position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:var(--purple-d);color:var(--purple);border:1px solid rgba(123,108,255,.3)}
+.aec-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.aec-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.aec-name{font-family:var(--fd);font-size:14px;font-weight:700}
+.aec-cat{font-size:11px;font-weight:600;margin-top:2px}
+.aec-meta{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--t3);margin-bottom:14px}
+.aec-actions{display:flex;gap:6px}
+
+/* ═══════════════════════════════════════
+   ADMIN EVENT MANAGER
+═══════════════════════════════════════ */
+.admin-tabs{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:4px;gap:4px;margin-bottom:24px}
+.atab{flex:1;padding:9px;text-align:center;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;color:var(--t2);font-family:var(--fd)}
+.atab.active{background:var(--gold);color:#08090f}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.ev-mgr-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.ev-mgr-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;transition:all .2s}
+.ev-mgr-card:hover{border-color:var(--bhi)}
+.ev-mgr-card .al{border-radius:0}
+.emc-icon{font-size:22px;flex-shrink:0}
+.emc-body{flex:1;min-width:0}
+.emc-name{font-family:var(--fd);font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.emc-meta{font-size:10px;color:var(--t3);margin-top:2px}
+.emc-actions{display:flex;gap:5px;flex-shrink:0}
+.add-event-form{background:var(--s1);border:1px solid var(--border);border-radius:var(--rxl);padding:24px;margin-bottom:20px}
+.add-event-form h4{font-family:var(--fd);font-size:16px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.aef-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fee-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;margin-left:6px}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media(max-width:860px){
+  #loginPage .split{grid-template-columns:1fr}
+  .ll{display:none}
+  .lr{padding:40px 28px;min-height:100vh}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .admin-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .gc{padding:22px 18px}
+  .g2,.g3{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .admin-grid{grid-template-columns:1fr}
+  .info-grid{grid-template-columns:1fr}
+  .countdown-strip{gap:8px}
+  .cd-box{min-width:48px;padding:10px 12px}
+  .nav{padding:12px 18px}
+  .toast{bottom:14px;right:14px;left:14px}
+  .aemGrid,.ev-mgr-grid{grid-template-columns:1fr}
+}
+
+/* Pay history row */
+.pay-hist-row{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);padding:16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;transition:all .2s}
+.pay-hist-row:hover{border-color:var(--bhi)}
+
+/* Event reminder float */
+.ev-reminder{position:fixed;bottom:80px;right:20px;z-index:9001;background:var(--s2);border:1px solid var(--bhi);border-radius:var(--rl);padding:16px;display:flex;align-items:center;gap:12px;max-width:320px;box-shadow:0 8px 32px var(--shadow);transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;transition:all .4s var(--ease)}
+.ev-reminder.show{transform:none;opacity:1;pointer-events:auto}
+</style>
+</head>
+<body>
+
+<!-- cursor -->
+<div id="cur"></div><div id="cur-ring"></div>
+
+<!-- bg -->
+<div class="bg-layer"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div class="noise"></div>
+<div class="grid-bg"></div>
+
+<!-- Theme toggle -->
+<button id="themeBtn" onclick="toggleTheme()" title="Toggle theme"><div class="knob">🌙</div></button>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="t-ico" id="t-ico"></div>
+  <div class="t-body"><div class="t-title" id="t-title"></div><div class="t-msg" id="t-msg"></div></div>
+</div>
+
+<!-- ═══ EVENT DETAIL MODAL ═══ -->
+<div class="overlay" id="evModal">
+  <div class="modal" id="evModalInner">
+    <div class="modal-hero" id="mh">
+      <button class="modal-close" onclick="closeEvModal()">✕</button>
+      <span class="modal-ev-icon" id="mIcon">⚙️</span>
+      <div class="modal-ev-name" id="mName">Event</div>
+      <span class="modal-tag" id="mTag">Technical</span>
+    </div>
+    <div class="modal-body">
+      <div class="prize-box">
+        <div class="prize-icon">🏆</div>
+        <div><div class="prize-title">Prize Pool</div><div class="prize-val" id="mPrize">₹10,000</div></div>
+      </div>
+      <div class="info-grid" id="mInfoGrid"></div>
+      <div class="ev-desc" id="mDesc"></div>
+      <h4 class="section-h">Rules & Guidelines</h4>
+      <ul class="rules-list" id="mRules"></ul>
+      <button class="btn btn-gold" onclick="registerFromModal()"><span class="lbl" id="mRegLbl">Register for this Event</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<div class="overlay" id="delModal">
+  <div class="modal" style="max-width:360px;padding:32px">
+    <div style="font-size:38px;margin-bottom:14px">🗑️</div>
+    <h3 style="font-family:var(--fd);font-size:20px;font-weight:800;margin-bottom:8px">Delete Registration?</h3>
+    <p style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:26px">This will permanently remove this registration. Cannot be undone.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1;margin-top:0" onclick="closeDelModal()">Cancel</button>
+      <button class="btn" style="flex:1;background:linear-gradient(135deg,#ff5757,#cc2222);color:#fff;box-shadow:0 4px 14px rgba(255,87,87,.35)" onclick="confirmDel()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════════════ -->
+<div class="page active" id="loginPage">
+  <div class="split">
+    <!-- LEFT -->
+    <div class="ll">
+      <div class="fest-badge"><span class="dot"></span>NexFest 2025 — Live</div>
+      <h1 class="hl">The Biggest<br><span class="ghost">College</span><span class="fire"> Event</span></h1>
+      <p class="ldesc">Register for 20+ events spanning Technical, Cultural &amp; Sports. One portal. All competitions.</p>
+      <div class="pills">
+        <span class="pill">⚙️ Hackathon</span><span class="pill">🤖 Robo Wars</span>
+        <span class="pill">🎭 Drama</span><span class="pill">🎵 Singing</span>
+        <span class="pill">🏆 Cricket</span><span class="pill">♟️ Chess</span>
+        <span class="pill">💻 Coding</span><span class="pill">+ 14 more</span>
+      </div>
+      <div class="countdown-strip" id="cdStrip">
+        <div class="cd-box"><div class="cd-num" id="cdD">00</div><div class="cd-lbl">Days</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-box"><div class="cd-num" id="cdH">00</div><div class="cd-lbl">Hrs</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-box"><div class="cd-num" id="cdM">00</div><div class="cd-lbl">Min</div></div>
+        <div class="cd-sep">:</div>
+        <div class="cd-box"><div class="cd-num" id="cdS">00</div><div class="cd-lbl">Sec</div></div>
+      </div>
+      <div class="mq">
+        <div class="mq-track">
+          <div class="mq-i">Hackathon</div><div class="mq-i">Robo Wars</div><div class="mq-i">Solo Dance</div>
+          <div class="mq-i">Cricket</div><div class="mq-i">AI Workshop</div><div class="mq-i">Drama</div>
+          <div class="mq-i">Paper Presentation</div><div class="mq-i">Football</div><div class="mq-i">Singing</div>
+          <div class="mq-i">Coding Contest</div><div class="mq-i">Hackathon</div><div class="mq-i">Robo Wars</div>
+          <div class="mq-i">Solo Dance</div><div class="mq-i">Cricket</div><div class="mq-i">AI Workshop</div>
+          <div class="mq-i">Drama</div><div class="mq-i">Paper Presentation</div><div class="mq-i">Football</div>
+          <div class="mq-i">Singing</div><div class="mq-i">Coding Contest</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="lr">
+      <div class="lfw">
+        <h2>Welcome</h2>
+        <p>Sign in to your account or join as admin</p>
+
+        <div class="login-tabs">
+          <div class="ltab active" id="tab-student" onclick="switchLoginTab('student')">🎓 Student</div>
+          <div class="ltab" id="tab-admin" onclick="switchLoginTab('admin')">🛡️ Admin</div>
+        </div>
+
+        <div id="student-form">
+          <div class="field" id="ln-f"><label>Full Name</label>
+            <div class="iw"><span class="ii">👤</span><input type="text" id="lName" placeholder="e.g. Arjun Sharma" autocomplete="name"></div>
+            <div class="ferr">Name is required</div>
+          </div>
+          <div class="field" id="lr-f"><label>Registration Number</label>
+            <div class="iw"><span class="ii">#</span><input type="text" id="lReg" placeholder="e.g. 21CSE1001" style="text-transform:uppercase"></div>
+            <div class="ferr">Reg. number is required</div>
+          </div>
+          <div class="field" id="lp-f"><label>Password</label>
+            <div class="iw"><span class="ii">🔑</span><input type="password" id="lPass" placeholder="Create a password" oninput="checkPwStrength(this.value)">
+              <button class="pw-eye" onclick="togglePw('lPass')" type="button">👁</button>
+            </div>
+            <div class="pw-strength" id="pw-s">
+              <div class="ps-bar"><div class="ps-fill" id="ps-fill" style="width:0%"></div></div>
+              <div class="ps-lbl" id="ps-lbl">Enter password</div>
+            </div>
+            <div class="ferr">Password required (min 6 chars)</div>
+          </div>
+          <div style="height:6px"></div>
+          <button class="btn btn-gold" id="loginBtn" onclick="login()">
+            <div class="spin"></div><span class="lbl">Enter the Fest →</span>
+          </button>
+        </div>
+
+        <div id="admin-form" style="display:none">
+          <div class="field" id="au-f"><label>Admin Username</label>
+            <div class="iw"><span class="ii">🛡️</span><input type="text" id="aUser" placeholder="admin"></div>
+            <div class="ferr">Username required</div>
+          </div>
+          <div class="field" id="ap-f"><label>Admin Password</label>
+            <div class="iw"><span class="ii">🔐</span><input type="password" id="aPass" placeholder="admin123">
+              <button class="pw-eye" onclick="togglePw('aPass')" type="button">👁</button>
+            </div>
+            <div class="ferr">Password required</div>
+          </div>
+          <div style="height:6px"></div>
+          <button class="btn btn-gold" id="adminLoginBtn" onclick="adminLogin()">
+            <div class="spin"></div><span class="lbl">Admin Login →</span>
+          </button>
+          <p style="font-size:11px;color:var(--t3);text-align:center;margin-top:10px">Demo: admin / admin123</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     NAVBAR (shows after login)
+════════════════════════════════════════ -->
+<nav class="nav" id="mainNav" style="display:none;position:fixed;top:0;left:0;right:0;z-index:200">
+  <div class="nav-logo">Nex<span>Fest</span> <span style="font-size:11px;color:var(--t3);font-weight:400">2025</span></div>
+  <div class="nav-right">
+    <div class="nav-chip" onclick="switchPage('regPage')" id="nav-reg">📝 Register</div>
+    <div class="nav-chip" onclick="goDash()">📋 My Events</div>
+    <div class="nav-chip" onclick="switchPage('schedulePage')">📅 Schedule</div>
+    <div class="nav-chip" id="nav-admin-link" style="display:none" onclick="switchPage('adminPage')">🛡️ Admin</div>
+    <div class="nav-chip" id="nav-user">
+      <div class="nav-avatar" id="nav-av">A</div>
+      <span id="nav-name">—</span>
+    </div>
+    <div class="nav-chip notif-bell" onclick="toggleNotifPanel()" id="notifBell" title="Notifications">
+      🔔
+      <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+    </div>
+    <div class="nav-chip" onclick="doLogout()" style="color:var(--pink)">↩ Logout</div>
+  </div>
+</nav>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-head">
+    <h4>🔔 Notifications</h4>
+    <div class="notif-head-actions">
+      <span class="notif-mark" onclick="markAllRead()">Mark all read</span>
+      <span class="notif-mark" onclick="clearNotifs()" style="color:var(--red)">Clear</span>
+    </div>
+  </div>
+  <div class="notif-list" id="notifList"><div class="notif-empty">No notifications yet</div></div>
+</div>
+
+<!-- EVENT REMINDER FLOAT -->
+<div class="ev-reminder" id="evReminder">
+  <button class="ev-reminder-close" onclick="dismissReminder()">✕</button>
+  <div class="ev-reminder-icon" id="erIcon">⏰</div>
+  <div class="ev-reminder-body">
+    <div class="ev-reminder-title" id="erTitle">Event Reminder</div>
+    <div class="ev-reminder-msg" id="erMsg">Your event starts soon!</div>
+    <div class="ev-reminder-bar"><div class="ev-reminder-bar-fill" id="erBar" style="width:100%"></div></div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="overlay" id="payModal">
+  <div class="modal pay-modal-inner">
+    <div class="modal-hero" id="payHero" style="padding:24px 28px">
+      <button class="modal-close" onclick="closePayModal()">✕</button>
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px">💳 Registration Fee</div>
+      <div style="font-family:var(--fd);font-size:22px;font-weight:800" id="payEventTitle">Hackathon</div>
+    </div>
+    <div class="modal-body" id="payBody">
+      <!-- Steps -->
+      <div class="pay-steps">
+        <div class="pay-step active" id="pstep1"><div class="ps-circle">1</div><div class="ps-lbl">Review</div></div>
+        <div class="pay-step" id="pstep2"><div class="ps-circle">2</div><div class="ps-lbl">Payment</div></div>
+        <div class="pay-step" id="pstep3"><div class="ps-circle">3</div><div class="ps-lbl">Confirm</div></div>
+      </div>
+      <!-- Step 1: Review -->
+      <div id="payStep1">
+        <div class="pay-summary">
+          <div class="pay-ev-name" id="pay-ev-name"></div>
+          <div class="pay-row"><span>Category</span><span id="pay-ev-cat">—</span></div>
+          <div class="pay-row"><span>Registration Fee</span><span id="pay-fee">₹0</span></div>
+          <div class="pay-row"><span>Total Payable</span><span id="pay-total">₹0</span></div>
+        </div>
+        <button class="btn btn-gold" onclick="goPayStep(2)"><span class="lbl">Proceed to Payment →</span></button>
+        <button class="btn btn-ghost" onclick="closePayModal()">Cancel</button>
+      </div>
+      <!-- Step 2: Choose Method -->
+      <div id="payStep2" style="display:none">
+        <div style="font-family:var(--fd);font-size:13px;font-weight:700;color:var(--t2);margin-bottom:14px;letter-spacing:.5px;text-transform:uppercase">Choose Payment Method</div>
+        <div class="pay-methods">
+          <div class="pay-method pay-opt" onclick="selPayMethod('upi',this)"><div class="pay-method-icon">📱</div><div class="pay-method-lbl">UPI / QR</div></div>
+          <div class="pay-method pay-opt" onclick="selPayMethod('card',this)"><div class="pay-method-icon">💳</div><div class="pay-method-lbl">Card</div></div>
+          <div class="pay-method pay-opt" onclick="selPayMethod('netbanking',this)"><div class="pay-method-icon">🏦</div><div class="pay-method-lbl">Net Banking</div></div>
+          <div class="pay-method pay-opt" onclick="selPayMethod('cash',this)"><div class="pay-method-icon">💵</div><div class="pay-method-lbl">Pay at Desk</div></div>
+        </div>
+        <div id="pay-method-hint" style="font-size:12px;color:var(--t3);margin-bottom:12px">Select a payment method above to continue.</div>
+        <div id="pay-upi-section" style="display:none">
+          <div class="field"><label>UPI ID</label>
+            <div class="iw"><span class="ii">@</span><input type="text" id="upiId" placeholder="yourname@upi"></div>
+          </div>
+        </div>
+        <div id="pay-card-section" style="display:none">
+          <div class="field"><label>Card Number</label>
+            <div class="iw"><span class="ii">💳</span><input type="text" id="cardNum" placeholder="•••• •••• •••• ••••" maxlength="19"></div>
+          </div>
+          <div class="g2">
+            <div class="field"><label>Expiry</label>
+              <div class="iw"><span class="ii">📅</span><input type="text" id="cardExp" placeholder="MM/YY" maxlength="5"></div>
+            </div>
+            <div class="field"><label>CVV</label>
+              <div class="iw"><span class="ii">🔐</span><input type="password" id="cardCvv" placeholder="•••" maxlength="3"></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-gold" id="payNowBtn" onclick="processPayment()"><div class="spin"></div><span class="lbl">Pay Now 🔒</span></button>
+        <button class="btn btn-ghost" onclick="goPayStep(1)">← Back</button>
+      </div>
+      <!-- Step 3: Success -->
+      <div id="payStep3" style="display:none">
+        <div class="pay-success-wrap">
+          <div class="pay-success-icon">✅</div>
+          <div style="font-family:var(--fd);font-size:22px;font-weight:800;margin-bottom:8px">Payment Successful!</div>
+          <div style="font-size:14px;color:var(--t2);margin-bottom:16px" id="paySuccessMsg">Your registration is confirmed.</div>
+          <div class="pay-txn" id="payTxnId">TXN: —</div>
+          <div style="margin-top:20px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:12px;color:var(--t2);line-height:1.7" id="payReceiptBox"></div>
+        </div>
+        <button class="btn btn-gold" style="margin-top:16px" onclick="closePayModal();goDash()"><span class="lbl">View My Events →</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN ADD EVENT MODAL -->
+<div class="overlay" id="addEvModal">
+  <div class="modal" style="max-width:560px">
+    <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="eyebrow">Admin</div>
+        <div style="font-family:var(--fd);font-size:20px;font-weight:800" id="addEvModalTitle">Add New Event</div>
+      </div>
+      <button class="modal-close" style="position:static" onclick="closeAddEvModal()">✕</button>
+    </div>
+    <div style="padding:24px 28px">
+      <div class="aef-grid">
+        <div class="field"><label>Event Name *</label>
+          <div class="iw"><span class="ii">🎯</span><input type="text" id="aev-name" placeholder="e.g. Photography Contest"></div>
+        </div>
+        <div class="field"><label>Category *</label>
+          <div class="iw ni"><select id="aev-cat">
+            <option value="">Select…</option>
+            <option value="tech">⚙️ Technical</option>
+            <option value="cultural">🎭 Cultural</option>
+            <option value="sports">🏆 Sports</option>
+          </select></div>
+        </div>
+        <div class="field"><label>Date</label>
+          <div class="iw"><span class="ii">📅</span><input type="text" id="aev-date" placeholder="Apr 25"></div>
+        </div>
+        <div class="field"><label>Time</label>
+          <div class="iw"><span class="ii">🕐</span><input type="text" id="aev-time" placeholder="10:00 AM – 1:00 PM"></div>
+        </div>
+        <div class="field"><label>Venue</label>
+          <div class="iw"><span class="ii">📍</span><input type="text" id="aev-venue" placeholder="Room / Hall / Ground"></div>
+        </div>
+        <div class="field"><label>Prize Pool</label>
+          <div class="iw"><span class="ii">🏆</span><input type="text" id="aev-prize" placeholder="₹5,000"></div>
+        </div>
+        <div class="field"><label>Entry Fee (₹, 0 = Free)</label>
+          <div class="iw"><span class="ii">💰</span><input type="number" id="aev-fee" placeholder="0" min="0"></div>
+        </div>
+        <div class="field"><label>Status</label>
+          <div class="iw ni"><select id="aev-status">
+            <option value="upcoming">Upcoming</option>
+            <option value="live">Live</option>
+            <option value="done">Done</option>
+          </select></div>
+        </div>
+      </div>
+      <div class="field"><label>Description</label>
+        <div class="iw ni"><textarea id="aev-desc" rows="3" placeholder="Brief description of the event…"></textarea></div>
+      </div>
+      <div class="field"><label>Rules (one per line)</label>
+        <div class="iw ni"><textarea id="aev-rules" rows="3" placeholder="Rule 1&#10;Rule 2&#10;Rule 3"></textarea></div>
+      </div>
+      <input type="hidden" id="aev-edit-key" value="">
+      <input type="hidden" id="aev-sdate" value="">
+      <button class="btn btn-gold" onclick="saveCustomEvent()"><div class="spin"></div><span class="lbl" id="addEvBtnLbl">➕ Add Event to Festival</span></button>
+      <button class="btn btn-ghost" onclick="closeAddEvModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAYMENT HISTORY PAGE
+════════════════════════════════════════ -->
+<div class="page" id="payHistPage">
+  <div class="inner" style="padding-top:80px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="eyebrow">Payments</div>
+        <div class="stitle">Payment History</div>
+      </div>
+      <button class="btn btn-ghost" style="width:auto;margin-top:0" onclick="switchPage('dashPage')">← Back to My Events</button>
+    </div>
+    <div class="stats-grid" style="margin-bottom:24px">
+      <div class="st"><div class="st-ico">💰</div><div class="st-num" id="ph-total">₹0</div><div class="st-lbl">Total Paid</div></div>
+      <div class="st"><div class="st-ico">✅</div><div class="st-num" id="ph-paid">0</div><div class="st-lbl">Successful</div></div>
+      <div class="st"><div class="st-ico">⏳</div><div class="st-num" id="ph-pend">0</div><div class="st-lbl">Pending</div></div>
+      <div class="st"><div class="st-ico">❌</div><div class="st-num" id="ph-fail">0</div><div class="st-lbl">Failed</div></div>
+    </div>
+    <div class="gc">
+      <div class="eyebrow">Transactions</div>
+      <div class="stitle" style="font-size:18px;margin-bottom:16px">All Transactions</div>
+      <div id="payHistList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     REGISTRATION PAGE
+════════════════════════════════════════ -->
+<div class="page" id="regPage">
+  <div class="inner" style="padding-top:80px">
+
+    <div class="prog">
+      <div class="stp active" id="stp1"><div class="stp-n">1</div><span>Details</span></div>
+      <div class="stp-line" id="sl1"></div>
+      <div class="stp active" id="stp2"><div class="stp-n">2</div><span>Event</span></div>
+      <div class="stp-line" id="sl2"></div>
+      <div class="stp" id="stp3"><div class="stp-n">3</div><span>Done</span></div>
+    </div>
+
+    <div class="edit-notice" id="edn"><span>✏️</span><span>Editing registration — update and save.</span></div>
+
+    <div class="gc">
+      <div class="eyebrow">Event Registration</div>
+      <div class="stitle">Register for NexFest 2025</div>
+      <div class="ssub">Fill in your details and choose your event</div>
+
+      <div class="g2">
+        <div class="field" id="en-f"><label>Full Name *</label>
+          <div class="iw"><span class="ii">👤</span><input type="text" id="ename" placeholder="Your name"></div>
+          <div class="ferr">Required</div>
+        </div>
+        <div class="field"><label>Phone</label>
+          <div class="iw"><span class="ii">📱</span><input type="tel" id="phone" placeholder="10-digit"></div>
+        </div>
+      </div>
+      <div class="field" id="em-f"><label>Email *</label>
+        <div class="iw"><span class="ii">📧</span><input type="email" id="email" placeholder="you@college.edu"></div>
+        <div class="ferr">Valid email required</div>
+      </div>
+      <div class="g3">
+        <div class="field" id="dp-f"><label>Department *</label>
+          <div class="iw ni"><select id="dept"><option value="">Dept.</option><option>CSE</option><option>ECE</option><option>MECH</option><option>CIVIL</option><option>IT</option><option>EEE</option><option>CHEM</option></select></div>
+          <div class="ferr">Required</div>
+        </div>
+        <div class="field" id="yr-f"><label>Year *</label>
+          <div class="iw ni"><select id="year"><option value="">Year</option><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option><option value="4">4th</option></select></div>
+          <div class="ferr">Required</div>
+        </div>
+        <div class="field"><label>Team Size</label>
+          <div class="iw"><span class="ii">👥</span><input type="number" id="team" placeholder="1" min="1" max="20"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:10px">Category *</label>
+        <div class="cat-grid">
+          <div class="cc tech" onclick="selCat('tech',this)"><span class="cc-emoji">⚙️</span><div class="cc-lbl">Technical</div><div class="cc-ct">5 events</div></div>
+          <div class="cc cultural" onclick="selCat('cultural',this)"><span class="cc-emoji">🎭</span><div class="cc-lbl">Cultural</div><div class="cc-ct">6 events</div></div>
+          <div class="cc sports" onclick="selCat('sports',this)"><span class="cc-emoji">🏆</span><div class="cc-lbl">Sports</div><div class="cc-ct">6 events</div></div>
+        </div>
+        <div class="ferr" id="cat-e" style="display:none;margin-top:5px">Select a category</div>
+      </div>
+
+      <div style="margin-bottom:18px">
+        <label style="display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:9px">Choose Event * <span id="ev-hint" style="color:var(--t3);font-size:10px;text-transform:none;letter-spacing:0">&nbsp;(click an event name for details)</span></label>
+        <div class="echips" id="echips"><span style="font-size:13px;color:var(--t3)">← Select a category first</span></div>
+        <div class="ferr" id="ev-e" style="display:none;margin-top:5px">Select an event</div>
+      </div>
+
+      <div class="field"><label>Additional Notes</label>
+        <div class="iw ni"><textarea id="details" placeholder="Team member names, special requirements…"></textarea></div>
+      </div>
+
+      <button class="btn btn-gold" onclick="registerEvent()" id="subBtn">
+        <div class="spin"></div><span class="lbl" id="subLbl">Register for Event</span>
+      </button>
+      <button class="btn btn-ghost" onclick="goDash()">View My Registrations →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     DASHBOARD PAGE
+════════════════════════════════════════ -->
+<div class="page" id="dashPage">
+  <div class="inner" style="padding-top:80px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div><div class="eyebrow">My Portal</div><div class="stitle">My Registrations</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" style="width:auto;margin-top:0" onclick="switchPage('regPage')">+ Register More</button>
+        <button class="btn btn-teal btn-sm" style="margin-top:0;padding:9px 16px" onclick="goPayHist()">💳 Payment History</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="st"><div class="st-ico">🎪</div><div class="st-num" id="sT">0</div><div class="st-lbl">Total</div></div>
+      <div class="st"><div class="st-ico">⚙️</div><div class="st-num" id="sTe">0</div><div class="st-lbl">Technical</div></div>
+      <div class="st"><div class="st-ico">🎭</div><div class="st-num" id="sCu">0</div><div class="st-lbl">Cultural</div></div>
+      <div class="st"><div class="st-ico">🏆</div><div class="st-num" id="sSp">0</div><div class="st-lbl">Sports</div></div>
+    </div>
+
+    <div class="sr-row">
+      <div class="siw"><span class="si">🔍</span><input type="text" id="srch" placeholder="Search events, names…" oninput="renderList()"></div>
+    </div>
+    <div class="ftabs">
+      <div class="ftab active" data-f="all" onclick="setF('all',this)"><span class="dot"></span>All</div>
+      <div class="ftab" data-f="tech" onclick="setF('tech',this)"><span class="dot"></span>Technical</div>
+      <div class="ftab" data-f="cultural" onclick="setF('cultural',this)"><span class="dot"></span>Cultural</div>
+      <div class="ftab" data-f="sports" onclick="setF('sports',this)"><span class="dot"></span>Sports</div>
+    </div>
+    <div class="ev-list" id="evList"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SCHEDULE PAGE
+════════════════════════════════════════ -->
+<div class="page" id="schedulePage">
+  <div class="inner" style="padding-top:80px">
+    <div class="eyebrow">Event Calendar</div>
+    <div class="stitle">Schedule & Timeline</div>
+    <p class="ssub">NexFest 2025 · April 25–27</p>
+
+    <div class="schedule-tabs">
+      <div class="schtab active" onclick="filterSchedule('all',this)">All Events</div>
+      <div class="schtab" onclick="filterSchedule('tech',this)">⚙️ Technical</div>
+      <div class="schtab" onclick="filterSchedule('cultural',this)">🎭 Cultural</div>
+      <div class="schtab" onclick="filterSchedule('sports',this)">🏆 Sports</div>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ADMIN PAGE
+════════════════════════════════════════ -->
+<div class="page" id="adminPage">
+  <div class="inner" style="padding-top:80px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="eyebrow">Organizer Panel</div>
+        <div class="stitle">Admin Dashboard</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="export-btn" onclick="openAddEvModal()">✚ Add Event</button>
+        <button class="export-btn" onclick="exportCSV()">⬇️ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <div class="atab active" onclick="switchAdminTab('registrations',this)">📋 Registrations</div>
+      <div class="atab" onclick="switchAdminTab('events',this)">🗂️ Event Manager</div>
+      <div class="atab" onclick="switchAdminTab('payments',this)">💳 Payments</div>
+      <div class="atab" onclick="switchAdminTab('analytics',this)">📊 Analytics</div>
+    </div>
+
+    <!-- TAB: Registrations -->
+    <div class="admin-section active" id="atab-registrations">
+      <div class="admin-grid">
+        <div class="admin-stat"><div class="bg-icon">🎪</div><div class="as-num" id="a-total" style="color:var(--gold)">0</div><div class="as-lbl">Total Registrations</div><div class="as-change">↑ Live</div></div>
+        <div class="admin-stat"><div class="bg-icon">⚙️</div><div class="as-num" id="a-tech" style="color:var(--purple)">0</div><div class="as-lbl">Technical</div></div>
+        <div class="admin-stat"><div class="bg-icon">🎭</div><div class="as-num" id="a-cultural" style="color:var(--pink)">0</div><div class="as-lbl">Cultural</div></div>
+        <div class="admin-stat"><div class="bg-icon">🏆</div><div class="as-num" id="a-sports" style="color:var(--teal)">0</div><div class="as-lbl">Sports</div></div>
+      </div>
+      <div class="sr-row" style="margin-bottom:0">
+        <div class="siw"><span class="si">🔍</span><input type="text" id="a-srch" placeholder="Search registrations…" oninput="renderAdmin()"></div>
+      </div>
+      <div class="admin-table-wrap" style="margin-top:14px">
+        <div class="admin-table-head">
+          <h3>All Registrations</h3>
+          <div style="display:flex;gap:8px">
+            <button class="export-btn" onclick="clearAll()">🗑️ Clear All</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead><tr>
+              <th>#</th><th>Name</th><th>Email</th><th>Dept</th><th>Year</th><th>Category</th><th>Event</th><th>Team</th><th>Payment</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="adminTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Event Manager -->
+    <div class="admin-section" id="atab-events">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div>
+          <div class="eyebrow">Manage Events</div>
+          <div class="stitle" style="font-size:18px">All Events <span id="evMgrCount" style="font-size:14px;color:var(--t3);font-weight:400"></span></div>
+        </div>
+        <button class="btn btn-gold btn-sm" style="width:auto" onclick="openAddEvModal()">✚ Add New Event</button>
+      </div>
+      <!-- Search & Filter -->
+      <div class="sr-row" style="margin-bottom:12px">
+        <div class="siw"><span class="si">🔍</span><input type="text" id="aem-srch" placeholder="Search events…" oninput="renderEventManager()"></div>
+      </div>
+      <div class="ftabs" id="evMgrTabs">
+        <div class="ftab active" onclick="setEvMgrFilter('all',this)"><span class="dot"></span>All</div>
+        <div class="ftab" onclick="setEvMgrFilter('tech',this)"><span class="dot"></span>Technical</div>
+        <div class="ftab" onclick="setEvMgrFilter('cultural',this)"><span class="dot"></span>Cultural</div>
+        <div class="ftab" onclick="setEvMgrFilter('sports',this)"><span class="dot"></span>Sports</div>
+      </div>
+      <div class="ev-mgr-grid" id="aemGrid"></div>
+    </div>
+
+    <!-- TAB: Payments -->
+    <div class="admin-section" id="atab-payments">
+      <div class="eyebrow">Revenue</div>
+      <div class="stitle" style="font-size:18px;margin-bottom:18px">Payment Overview</div>
+      <div class="admin-grid" style="margin-bottom:20px">
+        <div class="admin-stat"><div class="bg-icon">💰</div><div class="as-num" id="pay-total-amt" style="color:var(--green)">₹0</div><div class="as-lbl">Total Collected</div></div>
+        <div class="admin-stat"><div class="bg-icon">⏳</div><div class="as-num" id="pay-pending-count" style="color:var(--gold)">0</div><div class="as-lbl">Pending</div></div>
+        <div class="admin-stat"><div class="bg-icon">✅</div><div class="as-num" id="pay-paid-count" style="color:var(--teal)">0</div><div class="as-lbl">Paid</div></div>
+        <div class="admin-stat"><div class="bg-icon">🆓</div><div class="as-num" id="pay-free-count" style="color:var(--purple)">0</div><div class="as-lbl">Free Events</div></div>
+      </div>
+      <!-- Hidden alias IDs for renderAdminPayStats() -->
+      <span id="adm-rev" style="display:none"></span>
+      <span id="adm-paid" style="display:none"></span>
+      <span id="adm-pend" style="display:none"></span>
+      <span id="adm-fail" style="display:none"></span>
+      <div class="admin-table-wrap">
+        <div class="admin-table-head"><h3>Payment Log</h3></div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead><tr><th>#</th><th>Name</th><th>Event</th><th>Fee</th><th>Method</th><th>Status</th><th>TXN ID</th><th>Time</th></tr></thead>
+            <tbody id="payAdminTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Analytics -->
+    <div class="admin-section" id="atab-analytics">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="chartsArea">
+        <div class="gc" style="padding:22px">
+          <div class="eyebrow">Distribution</div>
+          <div class="stitle" style="font-size:16px">Events by Category</div>
+          <div id="bar-chart" style="margin-top:16px;display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+        <div class="gc" style="padding:22px">
+          <div class="eyebrow">Departments</div>
+          <div class="stitle" style="font-size:16px">Top Departments</div>
+          <div id="dept-chart" style="margin-top:16px;display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+/* ───────────────────────────────────────
+   DATA
+─────────────────────────────────────── */
+const EVTS = {
+  tech:     ["Hackathon","Coding Contest","AI Workshop","Robo Wars","Paper Presentation"],
+  cultural: ["Solo Dance","Group Dance","Singing","Drama","Mime","Stand-up Comedy"],
+  sports:   ["Football","Cricket","Badminton","Chess","Table Tennis","Kabaddi"]
+};
+const META = {
+  tech:     {icon:"⚙️",al:"al-t",lbl:"Technical",col:"#7b6cff",tagCls:"badge-tech"},
+  cultural: {icon:"🎭",al:"al-c",lbl:"Cultural",col:"#ff4db8",tagCls:"badge-cultural"},
+  sports:   {icon:"🏆",al:"al-s",lbl:"Sports",col:"#00e5c0",tagCls:"badge-sports"}
+};
+const EV_DETAILS = {
+  "Hackathon":           {prize:"₹25,000",venue:"Lab Block A",date:"Apr 25, 2025",time:"9:00 AM – 9:00 PM",desc:"A 12-hour intensive coding marathon. Build a working product from scratch that solves a real-world problem. Solo or team up to 4 members.",rules:["Team size: 1–4 members","All tech stacks allowed","Working prototype required","Plagiarism leads to disqualification","Use of AI tools permitted with disclosure"]},
+  "Coding Contest":      {prize:"₹10,000",venue:"CS Lab 201",date:"Apr 25, 2025",time:"2:00 PM – 5:00 PM",desc:"Competitive programming challenge with algorithmic problems ranging from easy to hard. Hosted on a custom judge platform.",rules:["Individual event only","3 hours, 5 problems","Languages: C, C++, Java, Python","No internet access during contest","Top 3 scores win prizes"]},
+  "AI Workshop":         {prize:"₹5,000",venue:"Seminar Hall",date:"Apr 26, 2025",time:"10:00 AM – 1:00 PM",desc:"Hands-on workshop on machine learning fundamentals. Build and deploy an ML model live with expert guidance.",rules:["Laptop mandatory","Python + Jupyter required","Open to all years","Certificate for all participants","Pre-registration mandatory"]},
+  "Robo Wars":           {prize:"₹30,000",venue:"Open Arena",date:"Apr 27, 2025",time:"9:00 AM – 6:00 PM",desc:"Battle robots in a combat arena! Build a remote-controlled bot under weight limits and fight for the championship.",rules:["Max bot weight: 15kg","Team size: 2–6 members","Bots must be submitted 1 day prior","Dangerous weapons prohibited","3 knockout rounds"]},
+  "Paper Presentation":  {prize:"₹8,000",venue:"Conference Room",date:"Apr 26, 2025",time:"10:00 AM – 4:00 PM",desc:"Present your research paper on any emerging technology topic. A panel of faculty judges will evaluate content, delivery, and innovation.",rules:["Solo or duo presentation","15 minutes presentation + 5 Q&A","IEEE format mandatory","Submit abstract 2 days prior","Topic must be from approved list"]},
+  "Solo Dance":          {prize:"₹15,000",venue:"Main Stage",date:"Apr 25, 2025",time:"4:00 PM – 7:00 PM",desc:"Express yourself through dance. Any style welcome — classical, western, fusion, or freestyle. Get judged on technique, expression, and stage presence.",rules:["3–5 minutes performance","Own music/track required","Costumes allowed","No offensive content","2 rounds: prelims & finals"]},
+  "Group Dance":         {prize:"₹20,000",venue:"Main Stage",date:"Apr 26, 2025",time:"5:00 PM – 8:00 PM",desc:"Team dance competition for groups of 4–12. Synchronization and theme are key to winning the crowd and judges over.",rules:["Team: 4–12 members","5–8 minutes performance","Theme-based encouraged","Music must be submitted 1 day prior","Props allowed within stage limits"]},
+  "Singing":             {prize:"₹12,000",venue:"Open Amphitheatre",date:"Apr 25, 2025",time:"5:00 PM – 7:00 PM",desc:"Showcase your vocal talent in this open singing competition. Any genre, any language — just sing your heart out.",rules:["Solo performance only","2–4 minutes","Karaoke tracks allowed","Live instruments also welcome","2 rounds: prelims & finals"]},
+  "Drama":               {prize:"₹18,000",venue:"Main Auditorium",date:"Apr 26, 2025",time:"2:00 PM – 5:00 PM",desc:"Put on a theatrical performance that moves, entertains or provokes thought. Original scripts and adaptations are both welcome.",rules:["Team: 5–15 members","15–20 minute performance","Script submission 3 days prior","No offensive or political content","Bilingual performances allowed"]},
+  "Mime":                {prize:"₹8,000",venue:"Open Stage",date:"Apr 27, 2025",time:"10:00 AM – 12:00 PM",desc:"Silent storytelling at its finest. Convey your message purely through movement and expression — no words, no sound.",rules:["Solo or duo","3–5 minutes","No props except minimal costume","Theme to be announced on event day","Judged on expression & creativity"]},
+  "Stand-up Comedy":     {prize:"₹10,000",venue:"Food Court Stage",date:"Apr 27, 2025",time:"6:00 PM – 9:00 PM",desc:"Make the audience laugh (and think). Original material only — no recycled internet jokes. Keep it clean and creative.",rules:["Solo performance","5–7 minutes","Original content only","No offensive/discriminatory jokes","Audience vote + judge score combined"]},
+  "Football":            {prize:"₹20,000",venue:"Sports Ground",date:"Apr 25-26, 2025",time:"7:00 AM – 5:00 PM",desc:"7-a-side football tournament on the college grounds. Fast-paced, competitive, and fun for all skill levels.",rules:["Team: exactly 7 players","Yellow/red card system applies","Knockout + finals format","Cleats allowed, metal studs not","Registration closes 3 days prior"]},
+  "Cricket":             {prize:"₹25,000",venue:"Cricket Ground",date:"Apr 25-27, 2025",time:"7:00 AM onwards",desc:"T10 cricket tournament with full officiating. Represent your department in the most anticipated sports event of the fest.",rules:["Team: 11 + 2 reserves","T10 format (10 overs per side)","Department-based teams","Leather ball used","Neutral umpires provided"]},
+  "Badminton":           {prize:"₹8,000",venue:"Indoor Court",date:"Apr 26, 2025",time:"9:00 AM – 5:00 PM",desc:"Singles and doubles badminton championship. Compete on a full-size indoor court under professional rules.",rules:["Singles & doubles both","Best of 3 games","21 points per game","Own racquet recommended","Shuttlecocks provided"]},
+  "Chess":               {prize:"₹6,000",venue:"Library Hall",date:"Apr 27, 2025",time:"10:00 AM – 4:00 PM",desc:"Strategic chess tournament using Swiss system pairing. All skill levels welcome from beginners to experts.",rules:["Individual event","Swiss system, 5 rounds","30 minutes per player per game","FIDE rules apply","Own clock recommended"]},
+  "Table Tennis":        {prize:"₹6,000",venue:"Indoor Hall",date:"Apr 26, 2025",time:"11:00 AM – 5:00 PM",desc:"Fast-paced table tennis with singles and doubles categories. Racquets provided, but bring your own if preferred.",rules:["Singles only","Best of 5 sets","11 points per game","No hiding the serve","Knockout format"]},
+  "Kabaddi":             {prize:"₹15,000",venue:"Sports Ground",date:"Apr 25, 2025",time:"3:00 PM – 6:00 PM",desc:"Traditional contact sport with modern tournament format. 7-player teams battle it out in timed raids and tackles.",rules:["Team: 7 players + 2 reserves","Standard kabaddi rules","20 min halves","No footwear on court","Referees appointed by organizers"]}
+};
+const SCHEDULE = [
+  {cat:"tech",name:"Hackathon",venue:"Lab Block A",date:"Apr 25",time:"9:00 AM",status:"upcoming"},
+  {cat:"cultural",name:"Solo Dance",venue:"Main Stage",date:"Apr 25",time:"4:00 PM",status:"upcoming"},
+  {cat:"sports",name:"Football",venue:"Sports Ground",date:"Apr 25",time:"7:00 AM",status:"live"},
+  {cat:"cultural",name:"Singing",venue:"Amphitheatre",date:"Apr 25",time:"5:00 PM",status:"upcoming"},
+  {cat:"tech",name:"Coding Contest",venue:"CS Lab 201",date:"Apr 25",time:"2:00 PM",status:"upcoming"},
+  {cat:"tech",name:"AI Workshop",venue:"Seminar Hall",date:"Apr 26",time:"10:00 AM",status:"upcoming"},
+  {cat:"cultural",name:"Group Dance",venue:"Main Stage",date:"Apr 26",time:"5:00 PM",status:"upcoming"},
+  {cat:"cultural",name:"Drama",venue:"Main Auditorium",date:"Apr 26",time:"2:00 PM",status:"upcoming"},
+  {cat:"tech",name:"Paper Presentation",venue:"Conference Room",date:"Apr 26",time:"10:00 AM",status:"upcoming"},
+  {cat:"sports",name:"Cricket",venue:"Cricket Ground",date:"Apr 25",time:"7:00 AM",status:"live"},
+  {cat:"sports",name:"Badminton",venue:"Indoor Court",date:"Apr 26",time:"9:00 AM",status:"upcoming"},
+  {cat:"sports",name:"Table Tennis",venue:"Indoor Hall",date:"Apr 26",time:"11:00 AM",status:"upcoming"},
+  {cat:"sports",name:"Robo Wars",venue:"Open Arena",date:"Apr 27",time:"9:00 AM",status:"upcoming"},
+  {cat:"cultural",name:"Stand-up Comedy",venue:"Food Court",date:"Apr 27",time:"6:00 PM",status:"upcoming"},
+  {cat:"cultural",name:"Mime",venue:"Open Stage",date:"Apr 27",time:"10:00 AM",status:"upcoming"},
+  {cat:"sports",name:"Chess",venue:"Library Hall",date:"Apr 27",time:"10:00 AM",status:"upcoming"},
+  {cat:"sports",name:"Kabaddi",venue:"Sports Ground",date:"Apr 25",time:"3:00 PM",status:"upcoming"},
+  {cat:"sports",name:"Football (Finals)",venue:"Sports Ground",date:"Apr 27",time:"4:00 PM",status:"upcoming"}
+];
+const ADMIN_CREDS = {username:"admin",password:"admin123"};
+
+let user=null,isAdmin=false,editIdx=null,delTarget=null,selCatV="",selEvV="",dashF="all",schedF="all";
+let modalEvName="";
+
+/* ───────────────────────────────────────
+   STORAGE
+─────────────────────────────────────── */
+const DB = {
+  get:(k,def=[])=>{try{const v=localStorage.getItem("nf25_"+k);return v!==null?JSON.parse(v):def;}catch(e){return def;}},
+  set:(k,v)=>localStorage.setItem("nf25_"+k,JSON.stringify(v))
+};
+
+/* ───────────────────────────────────────
+   CURSOR
+─────────────────────────────────────── */
+const cur=document.getElementById("cur"),ring=document.getElementById("cur-ring");
+document.addEventListener("mousemove",e=>{
+  cur.style.left=e.clientX+"px";cur.style.top=e.clientY+"px";
+  ring.style.left=e.clientX+"px";ring.style.top=e.clientY+"px";
+});
+
+/* ───────────────────────────────────────
+   THEME
+─────────────────────────────────────── */
+function toggleTheme(){
+  const t=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);
+  document.getElementById("themeBtn").querySelector(".knob").textContent=t==="dark"?"🌙":"☀️";
+  localStorage.setItem("nf25_theme",t);
+}
+(function(){
+  const saved=localStorage.getItem("nf25_theme")||"dark";
+  document.documentElement.setAttribute("data-theme",saved);
+  document.querySelector("#themeBtn .knob").textContent=saved==="dark"?"🌙":"☀️";
+})();
+
+/* ───────────────────────────────────────
+   TOAST
+─────────────────────────────────────── */
+const ICONS={success:"✅",error:"❌",info:"💡",warning:"⚠️"};
+let tT;
+function toast(title,msg="",type="success"){
+  const el=document.getElementById("toast");
+  el.className="toast "+type;
+  document.getElementById("t-ico").textContent=ICONS[type]||"ℹ️";
+  document.getElementById("t-title").textContent=title;
+  document.getElementById("t-msg").textContent=msg;
+  el.classList.add("on");
+  clearTimeout(tT);
+  tT=setTimeout(()=>el.classList.remove("on"),3600);
+}
+
+/* ───────────────────────────────────────
+   COUNTDOWN
+─────────────────────────────────────── */
+const festDate=new Date("2025-04-25T09:00:00");
+function tick(){
+  const diff=festDate-Date.now();
+  if(diff<=0){document.getElementById("cdStrip").innerHTML='<div style="color:var(--gold);font-family:var(--fd);font-size:18px;font-weight:700">🎉 NexFest is LIVE!</div>';return;}
+  const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);
+  document.getElementById("cdD").textContent=String(d).padStart(2,"0");
+  document.getElementById("cdH").textContent=String(h).padStart(2,"0");
+  document.getElementById("cdM").textContent=String(m).padStart(2,"0");
+  document.getElementById("cdS").textContent=String(s).padStart(2,"0");
+}
+tick();setInterval(tick,1000);
+
+/* ───────────────────────────────────────
+   PW STRENGTH
+─────────────────────────────────────── */
+function checkPwStrength(v){
+  const w=document.getElementById("pw-s");
+  const fill=document.getElementById("ps-fill");
+  const lbl=document.getElementById("ps-lbl");
+  if(!v){w.classList.remove("show");return}
+  w.classList.add("show");
+  let score=0;
+  if(v.length>=6)score++;if(v.length>=10)score++;
+  if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^a-zA-Z0-9]/.test(v))score++;
+  const levels=[[20,"#ff5757","Weak"],[40,"#ff9a3c","Fair"],[70,"var(--gold)","Good"],[100,"#4ade80","Strong"]];
+  const [pct,col,text]=score<=1?levels[0]:score<=2?levels[1]:score<=3?levels[2]:levels[3];
+  fill.style.width=pct+"%";fill.style.background=col;lbl.textContent=text;lbl.style.color=col;
+}
+function togglePw(id){const i=document.getElementById(id);i.type=i.type==="password"?"text":"password"}
+
+/* ───────────────────────────────────────
+   LOGIN TABS
+─────────────────────────────────────── */
+function switchLoginTab(t){
+  document.getElementById("student-form").style.display=t==="student"?"block":"none";
+  document.getElementById("admin-form").style.display=t==="admin"?"block":"none";
+  document.getElementById("tab-student").classList.toggle("active",t==="student");
+  document.getElementById("tab-admin").classList.toggle("active",t==="admin");
+}
+
+/* ───────────────────────────────────────
+   AUTH
+─────────────────────────────────────── */
+function login(){
+  const n=document.getElementById("lName").value.trim();
+  const r=document.getElementById("lReg").value.trim();
+  const p=document.getElementById("lPass").value;
+  let ok=true;
+  [{id:"lName",fid:"ln-f"},{id:"lReg",fid:"lr-f"},{id:"lPass",fid:"lp-f"}].forEach(({id,fid})=>{
+    const valid=id==="lPass"?document.getElementById(id).value.length>=6:!!document.getElementById(id).value.trim();
+    document.getElementById(fid).classList.toggle("err",!valid);
+    if(!valid)ok=false;
+  });
+  if(!ok){toast("Missing fields","Please fill all fields correctly","error");return}
+  const btn=document.getElementById("loginBtn");btn.classList.add("loading");
+  setTimeout(()=>{
+    btn.classList.remove("loading");
+    isAdmin=false;user={name:n,reg:r};
+    setupNav(n,false);
+    toast("Welcome!","Logged in as "+n,"success");
+    switchPage("regPage");
+  },800);
+}
+
+function adminLogin(){
+  const u=document.getElementById("aUser").value.trim();
+  const p=document.getElementById("aPass").value;
+  let ok=true;
+  if(!u){document.getElementById("au-f").classList.add("err");ok=false}else document.getElementById("au-f").classList.remove("err");
+  if(!p){document.getElementById("ap-f").classList.add("err");ok=false}else document.getElementById("ap-f").classList.remove("err");
+  if(!ok)return;
+  if(u!==ADMIN_CREDS.username||p!==ADMIN_CREDS.password){
+    document.getElementById("ap-f").classList.add("err");
+    toast("Access Denied","Invalid admin credentials","error");return;
+  }
+  const btn=document.getElementById("adminLoginBtn");btn.classList.add("loading");
+  setTimeout(()=>{
+    btn.classList.remove("loading");
+    isAdmin=true;user={name:"Admin",reg:"ADMIN"};
+    setupNav("Admin",true);
+    toast("Admin Access","Welcome to the organizer panel","info");
+    switchPage("adminPage");refreshAdmin();
+  },800);
+}
+
+function setupNav(name,admin){
+  document.getElementById("mainNav").style.display="flex";
+  document.getElementById("nav-av").textContent=name.charAt(0).toUpperCase();
+  document.getElementById("nav-name").textContent=name;
+  document.getElementById("nav-admin-link").style.display=admin?"flex":"none";
+  document.getElementById("nav-reg").style.display=admin?"none":"flex";
+}
+
+function doLogout(){
+  if(!confirm("Log out of NexFest?"))return;
+  user=null;isAdmin=false;
+  document.getElementById("mainNav").style.display="none";
+  clearForm();editIdx=null;
+  ["lName","lReg","lPass","aUser","aPass"].forEach(id=>document.getElementById(id).value="");
+  toast("Logged out","See you at the fest!","info");
+  switchPage("loginPage");
+}
+
+/* ───────────────────────────────────────
+   PAGE SWITCH
+─────────────────────────────────────── */
+function switchPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active","pg-in"));
+  const el=document.getElementById(id);el.classList.add("active");
+  requestAnimationFrame(()=>el.classList.add("pg-in"));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function goDash(){
+  const d=DB.get("regs");
+  document.getElementById("sT").textContent=d.length;
+  document.getElementById("sTe").textContent=d.filter(x=>x.cat==="tech").length;
+  document.getElementById("sCu").textContent=d.filter(x=>x.cat==="cultural").length;
+  document.getElementById("sSp").textContent=d.filter(x=>x.cat==="sports").length;
+  document.getElementById("srch").value="";dashF="all";
+  document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));
+  document.querySelector('[data-f="all"]').classList.add("active");
+  renderList();switchPage("dashPage");
+}
+function goPayHist(){renderPayHistory();switchPage("payHistPage");}
+
+/* ───────────────────────────────────────
+   CATEGORY & EVENTS
+─────────────────────────────────────── */
+function selCat(cat,el){
+  document.querySelectorAll(".cc").forEach(c=>c.classList.remove("sel"));
+  el.classList.add("sel");selCatV=cat;selEvV="";
+  document.getElementById("cat-e").style.display="none";
+  const ch=document.getElementById("echips");
+  ch.className="echips on";
+  ch.innerHTML=EVTS[cat].map(ev=>
+    `<div class="ec ${cat}" onclick="selEv('${ev.replace(/'/g,"\\'")}',this)">
+      <span class="ck">✓</span> ${ev}
+      <span style="font-size:10px;color:var(--t3);margin-left:4px" onclick="event.stopPropagation();openEvModal('${ev.replace(/'/g,"\\'")}','${cat}')" title="View details">ℹ</span>
+    </div>`
+  ).join("");
+}
+function selEv(ev,el){
+  document.querySelectorAll(".ec").forEach(c=>c.classList.remove("on"));
+  el.classList.add("on");selEvV=ev;
+  document.getElementById("ev-e").style.display="none";
+}
+
+/* ───────────────────────────────────────
+   EVENT DETAIL MODAL
+─────────────────────────────────────── */
+function openEvModal(name,cat){
+  const d=EV_DETAILS[name]||{prize:"TBD",venue:"TBD",date:"TBD",time:"TBD",desc:"Details coming soon.",rules:["Rules to be announced"]};
+  modalEvName=name;
+  const mh=document.getElementById("mh");
+  mh.className="modal-hero "+cat;
+  document.getElementById("mIcon").textContent=META[cat].icon;
+  document.getElementById("mName").textContent=name;
+  const tag=document.getElementById("mTag");
+  tag.textContent=META[cat].lbl;
+  tag.className="modal-tag tag-"+cat;
+  document.getElementById("mPrize").textContent=d.prize;
+  document.getElementById("mInfoGrid").innerHTML=`
+    <div class="info-box"><div class="ib-lbl">📍 Venue</div><div class="ib-val">${d.venue}</div></div>
+    <div class="info-box"><div class="ib-lbl">📅 Date</div><div class="ib-val">${d.date}</div></div>
+    <div class="info-box"><div class="ib-lbl">🕐 Time</div><div class="ib-val">${d.time}</div></div>
+    <div class="info-box"><div class="ib-lbl">🏷️ Category</div><div class="ib-val">${META[cat].lbl}</div></div>`;
+  document.getElementById("mDesc").textContent=d.desc;
+  document.getElementById("mRules").innerHTML=d.rules.map(r=>`<li>${r}</li>`).join("");
+  // If already registered for this event hide register btn
+  const regs=DB.get("regs");
+  const already=regs.some(r=>r.event===name);
+  const lbl=document.getElementById("mRegLbl");
+  lbl.textContent=already?"✓ Already Registered":"Register for this Event";
+  document.getElementById("evModal").classList.add("on");
+}
+function closeEvModal(){document.getElementById("evModal").classList.remove("on")}
+function registerFromModal(){
+  closeEvModal();
+  // pre-select in form
+  const cat=Object.keys(EVTS).find(c=>EVTS[c].includes(modalEvName));
+  if(cat){
+    const el=document.querySelector(".cc."+cat);
+    if(el)selCat(cat,el);
+    setTimeout(()=>{
+      const chip=[...document.querySelectorAll(".ec")].find(c=>c.textContent.replace("✓","").replace("ℹ","").trim()===modalEvName);
+      if(chip)selEv(modalEvName,chip);
+    },60);
+  }
+  switchPage("regPage");
+  window.scrollTo({top:300,behavior:"smooth"});
+}
+document.getElementById("evModal").addEventListener("click",e=>{if(e.target===document.getElementById("evModal"))closeEvModal()});
+
+/* ───────────────────────────────────────
+   REGISTER
+─────────────────────────────────────── */
+function registerEvent(){
+  const nm=document.getElementById("ename").value.trim();
+  const em=document.getElementById("email").value.trim();
+  const ph=document.getElementById("phone").value.trim();
+  const dp=document.getElementById("dept").value;
+  const yr=document.getElementById("year").value;
+  const tm=document.getElementById("team").value||"1";
+  const dt=document.getElementById("details").value.trim();
+  let ok=true;
+  const vf=(id,fid,check)=>{
+    const v=check?check(document.getElementById(id).value.trim()):!!document.getElementById(id).value.trim();
+    document.getElementById(fid).classList.toggle("err",!v);if(!v)ok=false;
+  };
+  vf("ename","en-f");
+  vf("email","em-f",v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+  vf("dept","dp-f");vf("year","yr-f");
+  if(!selCatV){document.getElementById("cat-e").style.display="block";ok=false}
+  if(!selEvV){document.getElementById("ev-e").style.display="block";ok=false}
+  if(!ok){toast("Validation Error","Fill all required fields","error");return}
+  const btn=document.getElementById("subBtn");btn.classList.add("loading");
+  setTimeout(()=>{
+    btn.classList.remove("loading");
+    let data=DB.get("regs");
+    const entry={name:nm,email:em,phone:ph,dept:dp,year:yr,cat:selCatV,event:selEvV,team:tm,details:dt,ts:Date.now(),fee:getEventFee(selEvV),payStatus:getEventFee(selEvV)===0?"free":"pending"};
+    if(editIdx!==null){
+      data[editIdx]=entry;editIdx=null;
+      document.getElementById("edn").classList.remove("on");
+      document.getElementById("subLbl").textContent="Register for Event";
+      toast("Updated!",selEvV+" registration saved","info");
+    }else{
+      data.push(entry);
+      toast("Registered!","You're in for "+selEvV+" 🎉","success");
+      pushNotif({type:"event",title:"🎉 Registration Confirmed",body:"You registered for "+selEvV,time:Date.now()});
+      const evD=EV_DETAILS[selEvV]||{};
+      if(evD.date&&evD.time){
+        scheduleReminder(selEvV,evD.date,evD.time,META[selCatV]?META[selCatV].icon:"🎯");
+      }
+    }
+    DB.set("regs",data);clearForm();
+    // mark steps done
+    document.getElementById("stp3").classList.add("done");
+    document.getElementById("sl2").classList.add("done");
+    // navigate to dashboard so the registration is visible immediately
+    setTimeout(()=>goDash(),300);
+  },700);
+}
+
+/* ───────────────────────────────────────
+   DASHBOARD
+─────────────────────────────────────── */
+function setF(f,el){dashF=f;document.querySelectorAll(".ftab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderList()}
+function renderList(){
+  const data=DB.get("regs");
+  const q=document.getElementById("srch").value.toLowerCase();
+  const filt=data.filter(d=>{
+    const mf=dashF==="all"||d.cat===dashF;
+    const ms=!q||d.event.toLowerCase().includes(q)||d.name.toLowerCase().includes(q)||d.dept.toLowerCase().includes(q);
+    return mf&&ms;
+  });
+  const list=document.getElementById("evList");
+  if(!filt.length){
+    list.innerHTML=`<div class="empty-s"><div class="ei2">${q?"🔍":"📋"}</div><h3>${q?"No results":"No registrations yet"}</h3><p>${q?"Try different terms":"Go back and register for events!"}</p></div>`;
+    return;
+  }
+  list.innerHTML=filt.map((d,fi)=>{
+    const ri=data.indexOf(d);
+    const m=META[d.cat]||{icon:"🎪",al:"",lbl:d.cat};
+    const evDef=EV_DETAILS[d.event]||{};
+    const fee=d.fee!==undefined?d.fee:(evDef.fee||0);
+    const payStatus=d.payStatus||"pending";
+    let payBadge="";
+    if(fee===0){
+      payBadge=`<span class="pay-status pay-free">Free</span>`;
+    } else if(payStatus==="paid"){
+      payBadge=`<span class="pay-status pay-paid">✓ Paid ₹${fee}</span>`;
+    } else {
+      payBadge=`<span class="pay-status pay-pending">⏳ Pay ₹${fee}</span>`;
+    }
+    return `<div class="er" style="animation-delay:${fi*45}ms">
+      <div class="al ${m.al}"></div>
+      <div class="eib">${m.icon}</div>
+      <div class="ei">
+        <div class="en">${d.event}</div>
+        <div class="em">
+          <span class="mc">👤 ${d.name}</span>
+          <span class="mc">🏫 ${d.dept} · Y${d.year}</span>
+          <span class="mc">👥 ${d.team}</span>
+          <span class="mc" style="color:${m.col}">${m.lbl}</span>
+          <span class="mc">${payBadge}</span>
+        </div>
+      </div>
+      <div class="ea">
+        <button class="btn btn-purple btn-sm" onclick="openEvModal('${d.event.replace(/'/g,"\\'")}','${d.cat}')">Details</button>
+        ${fee>0&&payStatus!=="paid"?`<button class="btn btn-gold btn-sm" onclick="openPayModal(${ri})" style="font-size:10px">💳 Pay</button>`:""}
+        <button class="btn btn-teal btn-sm" onclick="editRow(${ri})">Edit</button>
+        <button class="btn btn-pink btn-sm" onclick="openDelModal(${ri})">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+/* ───────────────────────────────────────
+   EDIT / DELETE
+─────────────────────────────────────── */
+function editRow(i){
+  const d=DB.get("regs")[i];editIdx=i;
+  document.getElementById("ename").value=d.name;document.getElementById("email").value=d.email;
+  document.getElementById("phone").value=d.phone||"";document.getElementById("dept").value=d.dept;
+  document.getElementById("year").value=d.year;document.getElementById("team").value=d.team;
+  document.getElementById("details").value=d.details||"";
+  const ce=document.querySelector(".cc."+d.cat);if(ce)selCat(d.cat,ce);
+  setTimeout(()=>{
+    const chip=[...document.querySelectorAll(".ec")].find(c=>c.textContent.replace("✓","").replace("ℹ","").trim()===d.event);
+    if(chip)selEv(d.event,chip);
+  },60);
+  document.getElementById("edn").classList.add("on");
+  document.getElementById("subLbl").textContent="Save Changes";
+  switchPage("regPage");
+}
+function openDelModal(i){delTarget=i;document.getElementById("delModal").classList.add("on")}
+function closeDelModal(){delTarget=null;document.getElementById("delModal").classList.remove("on")}
+function confirmDel(){
+  if(delTarget===null)return;
+  const d=DB.get("regs");d.splice(delTarget,1);DB.set("regs",d);
+  closeDelModal();toast("Deleted","Registration removed","error");
+  document.getElementById("sT").textContent=d.length;
+  document.getElementById("sTe").textContent=d.filter(x=>x.cat==="tech").length;
+  document.getElementById("sCu").textContent=d.filter(x=>x.cat==="cultural").length;
+  document.getElementById("sSp").textContent=d.filter(x=>x.cat==="sports").length;
+  renderList();
+}
+document.getElementById("delModal").addEventListener("click",e=>{if(e.target===document.getElementById("delModal"))closeDelModal()});
+
+/* ───────────────────────────────────────
+   SCHEDULE
+─────────────────────────────────────── */
+function filterSchedule(f,el){
+  schedF=f;
+  document.querySelectorAll(".schtab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");renderSchedule();
+}
+function renderSchedule(){
+  const filt=SCHEDULE.filter(s=>schedF==="all"||s.cat===schedF);
+  const tl=document.getElementById("timeline");
+  tl.innerHTML=filt.map((s,i)=>{
+    const m=META[s.cat];
+    const statusCls=s.status==="live"?"status-live":s.status==="done"?"status-done":"status-up";
+    const statusLbl=s.status==="live"?"🔴 Live":s.status==="done"?"✓ Done":"Upcoming";
+    const d=EV_DETAILS[s.name];
+    return `<div class="tl-item" style="animation-delay:${i*50}ms" onclick="openEvModal('${s.name.replace(/'/g,"\\'")}','${s.cat}')">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <div class="tl-time">${s.date} · ${s.time} <span class="tl-status ${statusCls}">${statusLbl}</span></div>
+        <div class="tl-name">${m.icon} ${s.name}</div>
+        <div class="tl-meta">
+          <span class="tl-venue">📍 ${s.venue}</span>
+          ${d?`<span>🏆 ${d.prize}</span>`:""}
+          <span style="color:${m.col}">${m.lbl}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+renderSchedule();
+
+/* ───────────────────────────────────────
+   ADMIN
+─────────────────────────────────────── */
+function refreshAdmin(){
+  const d=DB.get("regs");
+  document.getElementById("a-total").textContent=d.length;
+  document.getElementById("a-tech").textContent=d.filter(x=>x.cat==="tech").length;
+  document.getElementById("a-cultural").textContent=d.filter(x=>x.cat==="cultural").length;
+  document.getElementById("a-sports").textContent=d.filter(x=>x.cat==="sports").length;
+  renderAdmin();renderCharts();renderAdminPayTbl();
+}
+function renderAdmin(){
+  const d=DB.get("regs");
+  const q=document.getElementById("a-srch")?document.getElementById("a-srch").value.toLowerCase():"";
+  const filt=d.filter(x=>!q||x.name.toLowerCase().includes(q)||x.event.toLowerCase().includes(q)||x.dept.toLowerCase().includes(q)||x.email.toLowerCase().includes(q));
+  const tbody=document.getElementById("adminTbody");
+  if(!filt.length){
+    tbody.innerHTML=`<tr><td colspan="10" style="text-align:center;color:var(--t3);padding:28px">No registrations found</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=filt.map((r,i)=>{
+    const ri=d.indexOf(r);
+    const m=META[r.cat]||{tagCls:"",lbl:r.cat};
+    const fee=r.fee||0;
+    const payStatus=r.payStatus||"pending";
+    let payBadge=fee===0?`<span class="pay-status pay-free">Free</span>`:
+      payStatus==="paid"?`<span class="pay-status pay-paid">✓ Paid</span>`:
+      `<span class="pay-status pay-pending">Pending</span>`;
+    return `<tr>
+      <td style="color:var(--t3)">${i+1}</td>
+      <td><strong>${r.name}</strong></td>
+      <td style="color:var(--t2)">${r.email}</td>
+      <td>${r.dept}</td>
+      <td>Y${r.year}</td>
+      <td><span class="${m.tagCls}">${m.lbl}</span></td>
+      <td>${r.event}</td>
+      <td>${r.team}</td>
+      <td>${payBadge}</td>
+      <td><button class="btn btn-red btn-sm" onclick="adminDel(${ri})" style="font-size:10px">Remove</button></td>
+    </tr>`;
+  }).join("");
+}
+function adminDel(i){
+  const d=DB.get("regs");d.splice(i,1);DB.set("regs",d);
+  toast("Removed","Registration deleted by admin","error");
+  refreshAdmin();
+}
+function clearAll(){
+  if(!confirm("Clear ALL registrations? This cannot be undone."))return;
+  DB.set("regs",[]);toast("Cleared","All registrations removed","error");refreshAdmin();
+}
+function exportCSV(){
+  const d=DB.get("regs");
+  if(!d.length){toast("No Data","Nothing to export","warning");return}
+  const header=["Name","Email","Phone","Department","Year","Category","Event","Team Size","Notes"];
+  const rows=d.map(r=>[r.name,r.email,r.phone||"",r.dept,r.year,r.cat,r.event,r.team,(r.details||"").replace(/,/g,";")]);
+  const csv=[header,...rows].map(r=>r.join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download="NexFest2025_Registrations.csv";a.click();
+  toast("Exported","CSV downloaded successfully","success");
+}
+function renderCharts(){
+  const d=DB.get("regs");
+  const cats={tech:0,cultural:0,sports:0};
+  const depts={};
+  d.forEach(r=>{
+    if(cats[r.cat]!==undefined)cats[r.cat]++;
+    depts[r.dept]=(depts[r.dept]||0)+1;
+  });
+  const total=d.length||1;
+  const catInfo=[{k:"tech",lbl:"Technical",col:"var(--purple)"},{k:"cultural",lbl:"Cultural",col:"var(--pink)"},{k:"sports",lbl:"Sports",col:"var(--teal)"}];
+  document.getElementById("bar-chart").innerHTML=catInfo.map(ci=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>${ci.lbl}</span><span style="color:var(--t2)">${cats[ci.k]}</span></div>
+      <div style="height:8px;background:var(--s3);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${(cats[ci.k]/total*100).toFixed(1)}%;background:${ci.col};border-radius:4px;transition:width .6s var(--ease)"></div>
+      </div>
+    </div>`).join("");
+  const dSorted=Object.entries(depts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById("dept-chart").innerHTML=dSorted.length?dSorted.map(([k,v])=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>${k}</span><span style="color:var(--t2)">${v}</span></div>
+      <div style="height:8px;background:var(--s3);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${(v/total*100).toFixed(1)}%;background:var(--gold);border-radius:4px;transition:width .6s var(--ease)"></div>
+      </div>
+    </div>`).join(""):`<p style="font-size:13px;color:var(--t3)">No data yet</p>`;
+}
+
+/* ───────────────────────────────────────
+   HELPERS
+─────────────────────────────────────── */
+function clearForm(){
+  ["ename","email","phone","team","details"].forEach(id=>document.getElementById(id).value="");
+  ["dept","year"].forEach(id=>document.getElementById(id).value="");
+  document.querySelectorAll(".cc").forEach(c=>c.classList.remove("sel"));
+  document.getElementById("echips").className="echips";
+  document.getElementById("echips").innerHTML=`<span style="font-size:13px;color:var(--t3)">← Select a category first</span>`;
+  selCatV="";selEvV="";
+}
+
+/* ───────────────────────────────────────
+   PAYMENT SYSTEM
+─────────────────────────────────────── */
+let payTargetIdx=null,selPayMethodV="";
+
+function getEventFee(evName){
+  const custom=DB.get("customEvents");
+  const ce=custom.find(e=>e.name===evName);
+  if(ce&&ce.fee!==undefined)return parseInt(ce.fee)||200;
+  return 200; // default fee
+}
+
+function openPayModal(regIdx){
+  const regs=DB.get("regs");
+  const r=regs[regIdx];
+  if(!r)return;
+  payTargetIdx=regIdx;
+  selPayMethodV="";
+  document.querySelectorAll(".pay-opt").forEach(o=>o.classList.remove("sel"));
+  document.getElementById("pay-upi-section").style.display="none";
+  document.getElementById("pay-card-section").style.display="none";
+  document.getElementById("pay-method-hint").style.display="block";
+  document.getElementById("pay-ev-name").textContent=r.event;
+  document.getElementById("pay-ev-cat").textContent=META[r.cat]?META[r.cat].lbl:r.cat;
+  const fee=getEventFee(r.event);
+  document.getElementById("pay-fee").textContent="₹"+fee;
+  document.getElementById("pay-total").textContent="₹"+fee;
+  goPayStep(1);
+  document.getElementById("payModal").classList.add("on");
+}
+
+function closePayModal(){
+  document.getElementById("payModal").classList.remove("on");
+  payTargetIdx=null;selPayMethodV="";
+}
+
+function selPayMethod(method,el){
+  document.querySelectorAll(".pay-opt").forEach(o=>{o.classList.remove("sel");o.classList.remove("pay-method-selected");});
+  el.classList.add("sel");
+  selPayMethodV=method;
+  document.getElementById("pay-upi-section").style.display=method==="upi"?"block":"none";
+  document.getElementById("pay-card-section").style.display=method==="card"?"block":"none";
+  document.getElementById("pay-method-hint").style.display="none";
+}
+
+function processPayment(){
+  if(!selPayMethodV){toast("Select Method","Choose a payment method first","warning");return;}
+  if(payTargetIdx===null)return;
+  const btn=document.getElementById("payNowBtn");
+  btn.classList.add("loading");
+  setTimeout(()=>{
+    btn.classList.remove("loading");
+    const regs=DB.get("regs");
+    const r=regs[payTargetIdx];
+    const fee=getEventFee(r.event);
+    // simulate ~85% success rate for demo
+    const success=Math.random()>0.15;
+    const pays=DB.get("payments");
+    // remove old record for this reg if exists
+    const existing=pays.findIndex(p=>p.regIdx===payTargetIdx);
+    const txnId="NF"+Date.now().toString().slice(-8);
+    const newRec={regIdx:payTargetIdx,event:r.event,fee,status:success?"paid":"failed",method:selPayMethodV,ts:Date.now(),txnId};
+    if(existing>=0)pays[existing]=newRec; else pays.push(newRec);
+    DB.set("payments",pays);
+    if(success){
+      // update reg payStatus
+      regs[payTargetIdx].payStatus="paid";
+      DB.set("regs",regs);
+      // show step 3 success
+      document.getElementById("paySuccessMsg").textContent="₹"+fee+" paid for "+r.event;
+      document.getElementById("payTxnId").textContent="TXN: "+txnId;
+      document.getElementById("payReceiptBox").innerHTML="Event: <strong>"+r.event+"</strong><br>Method: "+selPayMethodV.toUpperCase()+"<br>Amount: ₹"+fee+"<br>Status: ✅ Confirmed";
+      goPayStep(3);
+      pushNotif({type:"payment",title:"Payment Confirmed ✅",body:"₹"+fee+" paid for "+r.event+" via "+selPayMethodV.toUpperCase()+". TXN: "+txnId,time:Date.now()});
+    }else{
+      closePayModal();
+      toast("Payment Failed","Please try again with a different method","error");
+      pushNotif({type:"alert",title:"Payment Failed ❌",body:"Your payment of ₹"+fee+" for "+r.event+" could not be processed. Please retry.",time:Date.now()});
+    }
+    renderList();updateNotifBadge();
+  },1600);
+}
+
+function renderPayHistory(){
+  const regs=DB.get("regs");
+  const pays=DB.get("payments");
+  let totalPaid=0,paidCt=0,pendCt=0,failCt=0;
+  pays.forEach(p=>{
+    if(p.status==="paid"){totalPaid+=p.fee;paidCt++;}
+    else if(p.status==="pending")pendCt++;
+    else failCt++;
+  });
+  document.getElementById("ph-total").textContent="₹"+totalPaid;
+  document.getElementById("ph-paid").textContent=paidCt;
+  document.getElementById("ph-pend").textContent=pendCt;
+  document.getElementById("ph-fail").textContent=failCt;
+  const list=document.getElementById("payHistList");
+  if(!pays.length){
+    list.innerHTML=`<div class="empty-s"><div class="ei2">💳</div><h3>No transactions yet</h3><p>Register for events and complete payment to see history here.</p></div>`;
+    return;
+  }
+  // merge with regs for display
+  list.innerHTML=pays.slice().reverse().map(p=>{
+    const r=regs[p.regIdx]||{name:"Unknown",cat:"tech"};
+    const m=META[r.cat]||{icon:"🎪",lbl:r.cat,col:"var(--gold)"};
+    const pCls=p.status==="paid"?"pay-paid":p.status==="failed"?"pay-failed":"pay-pending";
+    const pLbl=p.status==="paid"?"✓ Paid":p.status==="failed"?"✗ Failed":"⏳ Pending";
+    const d=new Date(p.ts);
+    const dStr=d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+    const tStr=d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+    const retryBtn=p.status!=="paid"?`<button class="btn btn-gold btn-sm" onclick="openPayModal(${p.regIdx})" style="margin-top:0;font-size:9px">Retry →</button>`:"";
+    return `<div class="pay-hist-row" style="gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${m.icon}</div>
+        <div>
+          <div style="font-weight:700;font-size:13px">${p.event}</div>
+          <div style="font-size:10px;color:var(--t3)">${p.method?p.method.toUpperCase()+" · ":""} ${dStr} ${tStr}${p.txnId?" · TXN: "+p.txnId:""}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--fd);font-weight:700;font-size:15px">₹${p.fee}</span>
+        <span class="pay-badge ${pCls}"><span class="pay-dot"></span>${pLbl}</span>
+        ${retryBtn}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderAdminPayStats(){
+  const pays=DB.get("payments");
+  let rev=0,paid=0,pend=0,fail=0;
+  pays.forEach(p=>{
+    if(p.status==="paid"){rev+=p.fee;paid++;}
+    else if(p.status==="pending")pend++;
+    else fail++;
+  });
+  document.getElementById("adm-rev").textContent="₹"+rev;
+  document.getElementById("adm-paid").textContent=paid;
+  document.getElementById("adm-pend").textContent=pend;
+  document.getElementById("adm-fail").textContent=fail;
+}
+
+/* ───────────────────────────────────────
+   NOTIFICATIONS SYSTEM
+─────────────────────────────────────── */
+function pushNotif(n){
+  const notifs=DB.get("notifs");
+  n.id="n_"+Date.now()+"_"+Math.random().toString(36).slice(2,6);
+  n.read=false;
+  notifs.unshift(n);
+  // keep only last 50
+  if(notifs.length>50)notifs.length=50;
+  DB.set("notifs",notifs);
+  updateNotifBadge();
+  renderNotifPanel();
+}
+
+function updateNotifBadge(){
+  const notifs=DB.get("notifs");
+  const unread=notifs.filter(n=>!n.read).length;
+  const badge=document.getElementById("notif-badge");
+  if(!badge)return;
+  if(unread>0){badge.style.display="flex";badge.textContent=unread>9?"9+":unread;}
+  else badge.style.display="none";
+}
+
+function toggleNotifPanel(){
+  const panel=document.getElementById("notifPanel");
+  const isOpen=panel.classList.contains("open");
+  if(isOpen){panel.classList.remove("open");}
+  else{panel.classList.add("open");renderNotifPanel();}
+}
+
+// close panel on outside click
+document.addEventListener("click",e=>{
+  const panel=document.getElementById("notifPanel");
+  const bell=document.getElementById("notifBell");
+  if(panel&&bell&&!panel.contains(e.target)&&!bell.contains(e.target)){
+    panel.classList.remove("open");
+  }
+});
+
+function renderNotifPanel(){
+  const notifs=DB.get("notifs");
+  const list=document.getElementById("notifList");
+  if(!notifs.length){
+    list.innerHTML=`<div class="notif-empty"><div class="ne-ico">🔕</div>No notifications yet</div>`;
+    return;
+  }
+  const typeMap={reminder:{cls:"ni-reminder",icon:"⏰"},payment:{cls:"ni-payment",icon:"💳"},system:{cls:"ni-system",icon:"🎪"},alert:{cls:"ni-alert",icon:"⚠️"}};
+  list.innerHTML=notifs.map(n=>{
+    const t=typeMap[n.type]||typeMap.system;
+    const timeAgo=getTimeAgo(n.time);
+    return `<div class="notif-item${n.read?"":" unread"}" onclick="markNotifRead('${n.id}')">
+      <div class="notif-icon ${t.cls}">${t.icon}</div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-msg">${n.body}</div>
+        <div class="notif-time">${timeAgo}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function markNotifRead(id){
+  const notifs=DB.get("notifs");
+  const n=notifs.find(x=>x.id===id);
+  if(n){n.read=true;DB.set("notifs",notifs);updateNotifBadge();renderNotifPanel();}
+}
+
+function markAllRead(){
+  const notifs=DB.get("notifs");
+  notifs.forEach(n=>n.read=true);
+  DB.set("notifs",notifs);
+  updateNotifBadge();renderNotifPanel();
+  toast("All Read","All notifications marked as read","info");
+}
+
+function clearNotifs(){
+  DB.set("notifs",[]);
+  updateNotifBadge();renderNotifPanel();
+  toast("Cleared","All notifications removed","info");
+}
+
+function getTimeAgo(ts){
+  const diff=Date.now()-ts;
+  const m=Math.floor(diff/60000);
+  if(m<1)return "Just now";
+  if(m<60)return m+"m ago";
+  const h=Math.floor(m/60);
+  if(h<24)return h+"h ago";
+  return Math.floor(h/24)+"d ago";
+}
+
+function scheduleEventReminders(){
+  // fire reminders for events registered but not reminded yet
+  const regs=DB.get("regs");
+  const reminded=DB.get("reminded",[]);
+  if(!regs.length)return;
+  regs.forEach((r,i)=>{
+    if(reminded.includes(i))return;
+    // find schedule entry
+    const sch=SCHEDULE.find(s=>s.name===r.event)||getCustomSchedule(r.event);
+    if(!sch)return;
+    // push an upcoming reminder notification
+    pushNotif({type:"reminder",title:"⏰ Event Reminder: "+r.event,body:"Don't forget! "+r.event+" is scheduled for "+sch.date+" at "+sch.time+" — "+sch.venue+". Make sure you're ready!",time:Date.now()});
+    reminded.push(i);
+  });
+  DB.set("reminded",reminded);
+}
+
+function getCustomSchedule(evName){
+  const custom=DB.get("customEvents");
+  const ce=custom.find(e=>e.name===evName);
+  if(ce)return {date:ce.sdate||ce.date,time:ce.time,venue:ce.venue};
+  return null;
+}
+
+/* ───────────────────────────────────────
+   PAYMENT STEPS
+─────────────────────────────────────── */
+function goPayStep(step){
+  [1,2,3].forEach(n=>{
+    document.getElementById("payStep"+n).style.display=n===step?"block":"none";
+    const ps=document.getElementById("pstep"+n);
+    ps.classList.remove("active","done");
+    if(n===step)ps.classList.add("active");
+    else if(n<step)ps.classList.add("done");
+  });
+}
+
+/* ───────────────────────────────────────
+   ADMIN TAB SWITCH
+─────────────────────────────────────── */
+function switchAdminTab(tab,el){
+  document.querySelectorAll(".atab").forEach(t=>t.classList.remove("active"));
+  document.querySelectorAll(".admin-section").forEach(s=>s.classList.remove("active"));
+  el.classList.add("active");
+  const sec=document.getElementById("atab-"+tab);
+  if(sec)sec.classList.add("active");
+  if(tab==="events")renderEventManager();
+  if(tab==="payments"){renderAdminPayTbl();renderAdminPayStats();}
+  if(tab==="analytics")renderCharts();
+}
+
+function renderAdminPayTbl(){
+  const pays=DB.get("payments");
+  const regs=DB.get("regs");
+  let rev=0,paid=0,pend=0,free=0;
+  const tbody=document.getElementById("payAdminTbody");
+  if(!tbody)return;
+  if(!pays.length){
+    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--t3);padding:28px">No payments yet</td></tr>`;
+    document.getElementById("pay-total-amt").textContent="₹0";
+    document.getElementById("pay-pending-count").textContent="0";
+    document.getElementById("pay-paid-count").textContent="0";
+    document.getElementById("pay-free-count").textContent="0";
+    return;
+  }
+  tbody.innerHTML=pays.map((p,i)=>{
+    const r=regs[p.regIdx]||{name:"Unknown"};
+    if(p.status==="paid"){rev+=p.fee;paid++;}
+    else if(p.status==="pending")pend++;
+    const pCls=p.status==="paid"?"pay-paid":p.status==="failed"?"":"pay-pending";
+    const d=p.ts?new Date(p.ts).toLocaleString("en-IN",{dateStyle:"short",timeStyle:"short"}):"—";
+    return `<tr>
+      <td style="color:var(--t3)">${i+1}</td>
+      <td><strong>${r.name}</strong></td>
+      <td>${p.event||"—"}</td>
+      <td>₹${p.fee||0}</td>
+      <td>${p.method?p.method.toUpperCase():"—"}</td>
+      <td><span class="pay-status ${pCls}">${p.status||"—"}</span></td>
+      <td style="font-size:10px;color:var(--t3)">${p.txnId||"—"}</td>
+      <td style="font-size:11px;color:var(--t3)">${d}</td>
+    </tr>`;
+  }).join("");
+  // count free events
+  regs.forEach(r=>{if((r.fee||0)===0)free++;});
+  document.getElementById("pay-total-amt").textContent="₹"+rev;
+  document.getElementById("pay-pending-count").textContent=pend;
+  document.getElementById("pay-paid-count").textContent=paid;
+  document.getElementById("pay-free-count").textContent=free;
+}
+
+/* ───────────────────────────────────────
+   ADMIN EVENT MANAGER FILTER
+─────────────────────────────────────── */
+let evMgrFilter="all";
+function setEvMgrFilter(f,el){
+  evMgrFilter=f;
+  document.querySelectorAll("#evMgrTabs .ftab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  renderEventManager();
+}
+
+/* ───────────────────────────────────────
+   EVENT REMINDER FLOAT
+─────────────────────────────────────── */
+function scheduleReminder(evName,dateStr,timeStr,icon){
+  setTimeout(()=>{
+    const el=document.getElementById("evReminder");
+    document.getElementById("erIcon").textContent=icon||"⏰";
+    document.getElementById("erTitle").textContent="Event Reminder: "+evName;
+    document.getElementById("erMsg").textContent="Scheduled: "+dateStr+" at "+timeStr;
+    el.classList.add("show");
+    // auto-dismiss after 8s
+    let w=100;
+    const bar=document.getElementById("erBar");
+    const iv=setInterval(()=>{w-=1.25;if(bar)bar.style.width=w+"%";if(w<=0){clearInterval(iv);dismissReminder();}},100);
+  },2000);
+}
+
+function dismissReminder(){
+  const el=document.getElementById("evReminder");
+  if(el)el.classList.remove("show");
+}
+
+/* ───────────────────────────────────────
+let editEvKey=null;
+
+function getAllEvents(){
+  const custom=DB.get("customEvents");
+  // merge built-in with custom
+  const all=[];
+  Object.entries(EVTS).forEach(([cat,evArr])=>{
+    evArr.forEach(name=>{
+      const d=EV_DETAILS[name]||{prize:"TBD",venue:"TBD",date:"TBD",time:"TBD"};
+      const sch=SCHEDULE.find(s=>s.name===name);
+      all.push({name,cat,venue:d.venue,date:d.date,time:d.time,prize:d.prize,sdate:sch?sch.date:"",isCustom:false,fee:200});
+    });
+  });
+  custom.forEach(ce=>{all.push({...ce,isCustom:true});});
+  return all;
+}
+
+function renderEventManager(){
+  const q=(document.getElementById("aem-srch")?document.getElementById("aem-srch").value.toLowerCase():"");
+  const all=getAllEvents().filter(e=>{
+    const matchF=evMgrFilter==="all"||e.cat===evMgrFilter;
+    const matchQ=!q||e.name.toLowerCase().includes(q)||e.cat.toLowerCase().includes(q)||(e.venue||"").toLowerCase().includes(q);
+    return matchF&&matchQ;
+  });
+  const grid=document.getElementById("aemGrid");
+  if(!grid)return;
+  if(!all.length){
+    grid.innerHTML=`<div style="padding:30px;color:var(--t3);font-size:13px;grid-column:1/-1;text-align:center">No events found</div>`;
+    return;
+  }
+  grid.innerHTML=all.map(e=>{
+    const m=META[e.cat]||{icon:"🎪",col:"var(--gold)",lbl:e.cat};
+    const catColor={tech:"rgba(123,108,255,.15)",cultural:"rgba(255,77,184,.15)",sports:"rgba(0,229,192,.15)"}[e.cat]||"var(--s3)";
+    return `<div class="aem-card">
+      ${e.isCustom?`<div class="aem-custom-badge">Custom</div>`:""}
+      <div class="aec-head">
+        <div class="aec-icon" style="background:${catColor}">${m.icon}</div>
+        <div>
+          <div class="aec-name">${e.name}</div>
+          <div class="aec-cat" style="color:${m.col}">${m.lbl}</div>
+        </div>
+      </div>
+      <div class="aec-meta">
+        <span>📍 ${e.venue}</span>
+        <span>📅 ${e.date} · ${e.time}</span>
+        <span>🏆 ${e.prize||"TBD"}</span>
+        <span>💰 Fee: ₹${e.fee||200}</span>
+      </div>
+      <div class="aec-actions">
+        ${e.isCustom?`<button class="btn btn-teal btn-sm" onclick="editCustomEvent('${e.name.replace(/'/g,"\\'")}')">Edit</button>
+        <button class="btn btn-red btn-sm" onclick="deleteCustomEvent('${e.name.replace(/'/g,"\\'")}')">Delete</button>`:
+        `<button class="btn btn-ghost btn-sm" onclick="viewBuiltInEvent('${e.name.replace(/'/g,"\\'")}','${e.cat}')">View</button>`}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openAddEvModal(){
+  editEvKey=null;
+  ["aev-name","aev-venue","aev-prize","aev-date","aev-time","aev-sdate","aev-desc","aev-rules"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("aev-cat").value="";
+  document.getElementById("aev-fee").value="200";
+  document.getElementById("aev-status").value="upcoming";
+  document.getElementById("aev-edit-key").value="";
+  document.getElementById("addEvModalTitle").textContent="Add New Event";
+  document.getElementById("addEvBtnLbl").textContent="➕ Add Event to Festival";
+  document.getElementById("addEvModal").classList.add("on");
+}
+
+function closeAddEvModal(){document.getElementById("addEvModal").classList.remove("on");}
+document.getElementById("addEvModal").addEventListener("click",e=>{if(e.target===document.getElementById("addEvModal"))closeAddEvModal();});
+
+function editCustomEvent(name){
+  const custom=DB.get("customEvents");
+  const ce=custom.find(e=>e.name===name);
+  if(!ce)return;
+  editEvKey=name;
+  document.getElementById("aev-name").value=ce.name;
+  document.getElementById("aev-cat").value=ce.cat;
+  document.getElementById("aev-venue").value=ce.venue||"";
+  document.getElementById("aev-prize").value=ce.prize||"";
+  document.getElementById("aev-date").value=ce.date||"";
+  document.getElementById("aev-time").value=ce.time||"";
+  document.getElementById("aev-sdate").value=ce.sdate||"";
+  document.getElementById("aev-desc").value=ce.desc||"";
+  document.getElementById("aev-rules").value=(ce.rules||[]).join("\n");
+  document.getElementById("aev-fee").value=ce.fee||200;
+  document.getElementById("aev-status").value=ce.status||"upcoming";
+  document.getElementById("aev-edit-key").value=name;
+  document.getElementById("addEvModalTitle").textContent="Edit Event";
+  document.getElementById("addEvBtnLbl").textContent="💾 Save Changes";
+  document.getElementById("addEvModal").classList.add("on");
+}
+
+function viewBuiltInEvent(name,cat){closeAddEvModal();openEvModal(name,cat);}
+
+function deleteCustomEvent(name){
+  if(!confirm("Delete custom event '"+name+"'? This cannot be undone."))return;
+  let custom=DB.get("customEvents");
+  custom=custom.filter(e=>e.name!==name);
+  DB.set("customEvents",custom);
+  // also remove from EVTS runtime
+  Object.keys(EVTS).forEach(cat=>{EVTS[cat]=EVTS[cat].filter(e=>e!==name);});
+  // remove from SCHEDULE runtime
+  const si=SCHEDULE.findIndex(s=>s.name===name);
+  if(si>=0)SCHEDULE.splice(si,1);
+  toast("Deleted","Event '"+name+"' removed","error");
+  renderEventManager();renderSchedule();
+  // update category cards
+  updateCatCounts();
+}
+
+function saveCustomEvent(){
+  const name=document.getElementById("aev-name").value.trim();
+  const cat=document.getElementById("aev-cat").value;
+  const venue=document.getElementById("aev-venue").value.trim();
+  const prize=document.getElementById("aev-prize").value.trim();
+  const date=document.getElementById("aev-date").value.trim();
+  const time=document.getElementById("aev-time").value.trim();
+  const sdateEl=document.getElementById("aev-sdate");
+  const sdate=sdateEl?sdateEl.value.trim():"";
+  const statusEl=document.getElementById("aev-status");
+  const evStatus=statusEl?statusEl.value:"upcoming";
+  const desc=document.getElementById("aev-desc").value.trim();
+  const rulesRaw=document.getElementById("aev-rules").value.trim();
+  const fee=parseInt(document.getElementById("aev-fee").value)||200;
+  const rules=rulesRaw?rulesRaw.split("\n").filter(r=>r.trim()):["Rules to be announced"];
+  if(!name||!cat||!venue||!date||!time){toast("Validation","Fill Name, Category, Venue, Date & Time","error");return;}
+
+  const btn=document.querySelector("#addEvModal .btn-gold");
+  btn.classList.add("loading");
+
+  setTimeout(()=>{
+    btn.classList.remove("loading");
+    const evObj={name,cat,venue,prize:prize||"TBD",date,time,sdate:sdate||date,desc,rules,fee,status:evStatus,isCustom:true,ts:Date.now()};
+    let custom=DB.get("customEvents");
+    const oldKey=document.getElementById("aev-edit-key").value;
+
+    if(oldKey){
+      // editing existing custom
+      const idx=custom.findIndex(e=>e.name===oldKey);
+      if(idx>=0){
+        const oldName=custom[idx].name;
+        custom[idx]=evObj;
+        // update runtime EVTS if name changed
+        Object.keys(EVTS).forEach(c=>{EVTS[c]=EVTS[c].filter(e=>e!==oldName);});
+        if(!EVTS[cat])EVTS[cat]=[];
+        if(!EVTS[cat].includes(name))EVTS[cat].push(name);
+        // update SCHEDULE
+        const si=SCHEDULE.findIndex(s=>s.name===oldName);
+        if(si>=0)SCHEDULE[si]={cat,name,venue,date:evObj.sdate||date,time,status:evStatus};
+        // update EV_DETAILS
+        EV_DETAILS[name]={prize:prize||"TBD",venue,date,time,desc,rules};
+        if(oldName!==name)delete EV_DETAILS[oldName];
+      }
+      toast("Updated! ✅","Event '"+name+"' updated","success");
+    }else{
+      // new event
+      if(getAllEvents().some(e=>e.name===name)){toast("Duplicate","An event with this name already exists","error");btn.classList.remove("loading");return;}
+      custom.push(evObj);
+      // inject into runtime EVTS
+      if(!EVTS[cat])EVTS[cat]=[];
+      EVTS[cat].push(name);
+      // inject into SCHEDULE
+      SCHEDULE.push({cat,name,venue,date:sdate||date,time,status:evStatus});
+      // inject into EV_DETAILS
+      EV_DETAILS[name]={prize:prize||"TBD",venue,date,time,desc,rules};
+      toast("Added! 🎉","'"+name+"' added to "+META[cat].lbl+" events","success");
+      pushNotif({type:"system",title:"New Event Added 📣",body:"Admin added '"+name+"' to the "+META[cat].lbl+" category. Check the schedule!",time:Date.now()});
+    }
+
+    DB.set("customEvents",custom);
+    closeAddEvModal();
+    renderEventManager();
+    renderSchedule();
+    updateCatCounts();
+  },700);
+}
+
+function updateCatCounts(){
+  // update the registration category cards counts
+  document.querySelectorAll(".cc").forEach(card=>{
+    const cat=card.classList[1];
+    if(cat&&EVTS[cat]){
+      const ct=card.querySelector(".cc-ct");
+      if(ct)ct.textContent=EVTS[cat].length+" events";
+    }
+  });
+}
+
+/* ───────────────────────────────────────
+   KEYBOARD
+─────────────────────────────────────── */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    if(document.getElementById("loginPage").classList.contains("active")){
+      if(document.getElementById("student-form").style.display!=="none")login();
+      else adminLogin();
+    }
+  }
+  if(e.key==="Escape"){closeEvModal();closeDelModal();closePayModal();closeAddEvModal();document.getElementById("notifPanel").classList.remove("open");}
+});
+</script>
+</body>
+</html>
