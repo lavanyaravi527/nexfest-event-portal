@@ -6,6 +6,7 @@ A feature-rich, single-page web application built with pure HTML, CSS, and JavaS
 
 ## 🌐 Live Demo
 [Click here to view the live site](#) 
+https://lavanyaravi527.github.io/nexfest-event-portal/
 
 ---
 
